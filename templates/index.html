@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Evaluador de Gramáticas</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Evaluador de Gramáticas Tipo 2 y 3</h1>
+        <form id="grammarForm">
+            <label for="productions">Producciones (Ejemplo: S → AB, A → aa, B → BB, B → b):</label>
+            <textarea id="productions" name="productions" rows="5" required></textarea>
+            <label for="start_symbol">Símbolo Inicial (S):</label>
+            <input type="text" id="start_symbol" name="start_symbol" placeholder="Ejemplo: S" required>
+            <label for="input_string">Cadena a Evaluar:</label>
+            <input type="text" id="input_string" name="input_string" placeholder="Ejemplo: aab" required>
+            <button type="button" id="generateGrammarBtn">Generar Gramática</button>
+        </form>
+
+        <!-- Área para mostrar la gramática generada -->
+        <div class="grammar-display">
+            <h2>Gramática Generada</h2>
+            <pre id="generatedGrammar"></pre>
+        </div>
+
+        <!-- Botones para evaluar y generar derivaciones -->
+        <div class="buttons">
+            <button type="button" id="evaluateGrammarBtn">Evaluar Gramática</button>
+            <button type="button" id="generateDerivationsBtn">Generar Derivaciones</button>
+        </div>
+
+        <!-- Resultados de la evaluación -->
+        <div id="result"></div>
+        <div id="derivations"></div>
+        <div id="grammarType"></div>
+    </div>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
