@@ -5,16 +5,28 @@ def evaluate_string(grammar, start_symbol, input_string):
     productions = parse_grammar(grammar)
     
     def derive(symbol, string):
+        # Si la cadena está vacía, verificamos si el símbolo puede derivar en λ
         if not string:
             return symbol in productions and 'λ' in productions[symbol]
+        
+        # Si el símbolo tiene producciones
         if symbol in productions:
             for production in productions[symbol]:
-                if len(production) == 1 and production[0] == string[0]:
-                    if derive(production[0], string[1:]):
+                # Si la producción es λ, la ignoramos (ya se maneja arriba)
+                if production == 'λ':
+                    continue
+                
+                # Si la producción coincide con el primer carácter de la cadena
+                if string.startswith(production):
+                    if derive(symbol, string[len(production):]):
                         return True
-                elif len(production) == 2 and production[0] == string[0]:
-                    if derive(production[1], string[1:]):
-                        return True
+                
+                # Si la producción es de la forma A → BC
+                if len(production) == 2 and production[0].isupper() and production[1].isupper():
+                    # Dividimos la cadena en dos partes y derivamos recursivamente
+                    for i in range(1, len(string)):
+                        if derive(production[0], string[:i]) and derive(production[1], string[i:]):
+                            return True
         return False
     
     return derive(start_symbol, input_string)
@@ -31,10 +43,12 @@ def generate_derivations(grammar, start_symbol, input_string):
             return
         if symbol in productions:
             for production in productions[symbol]:
-                if len(production) == 1 and production[0] == string[0]:
-                    derive(production[0], string[1:], path + [f"{symbol} → {production[0]}"])
-                elif len(production) == 2 and production[0] == string[0]:
-                    derive(production[1], string[1:], path + [f"{symbol} → {production[0]}{production[1]}"])
+                if string.startswith(production):
+                    derive(symbol, string[len(production):], path + [f"{symbol} → {production}"])
+                elif len(production) == 2 and production[0].isupper() and production[1].isupper():
+                    for i in range(1, len(string)):
+                        if derive(production[0], string[:i], path + [f"{symbol} → {production}"]) and derive(production[1], string[i:], path + [f"{symbol} → {production}"]):
+                            derivations.append(path + [f"{symbol} → {production}"])
     
     derive(start_symbol, input_string, [])
     return derivations
