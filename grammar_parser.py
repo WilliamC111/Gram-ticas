@@ -1,5 +1,4 @@
 def parse_grammar(grammar):
-    # Parsear la gramática ingresada por el usuario
     productions = {}
     for production in grammar.split('\n'):
         if '→' in production:
