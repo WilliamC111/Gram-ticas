@@ -1,20 +1,51 @@
 let grammarData = {};
 
+// Agregar una nueva fila a la tabla de producciones
+document.getElementById('addProductionBtn').addEventListener('click', function() {
+    const table = document.getElementById('productionsTable').getElementsByTagName('tbody')[0];
+    const newRow = table.insertRow();
+    newRow.innerHTML = `
+        <td><input type="text" class="variable-input" placeholder="Ejemplo: S"></td>
+        <td>→</td>
+        <td><input type="text" class="production-input" placeholder="Ejemplo: AB"></td>
+    `;
+});
+
+// Generar la gramática
 document.getElementById('generateGrammarBtn').addEventListener('click', function() {
-    const productions = document.getElementById('productions').value;
+    const table = document.getElementById('productionsTable').getElementsByTagName('tbody')[0];
     const startSymbol = document.getElementById('start_symbol').value;
 
-    // Parsear las producciones
-    const { variables, terminals, grammar } = parseProductions(productions);
+    let variables = new Set();
+    let terminals = new Set();
+    let grammar = '';
+
+    for (let row of table.rows) {
+        const variable = row.cells[0].querySelector('input').value.trim();
+        const production = row.cells[2].querySelector('input').value.trim();
+
+        if (variable && production) {
+            variables.add(variable);
+            grammar += `${variable} → ${production}\n`;
+
+            // terminales
+            production.split('').forEach(symbol => {
+                if (/[a-z]/.test(symbol)) {
+                    terminals.add(symbol);
+                }
+            });
+        }
+    }
 
     // Mostrar la gramática generada
     document.getElementById('generatedGrammar').textContent = 
-        `Variables: ${variables.join(', ')}\nTerminales: ${terminals.join(', ')}\nProducciones:\n${grammar}`;
+        `Variables: ${Array.from(variables).join(', ')}\nTerminales: ${Array.from(terminals).join(', ')}\nProducciones:\n${grammar}`;
 
     // Guardar los datos para usarlos en los botones de evaluar y generar derivaciones
-    grammarData = { variables, terminals, grammar, startSymbol };
+    grammarData = { variables: Array.from(variables), terminals: Array.from(terminals), grammar, startSymbol };
 });
 
+// Evaluar la gramática
 document.getElementById('evaluateGrammarBtn').addEventListener('click', function() {
     const inputString = document.getElementById('input_string').value;
 
@@ -49,6 +80,7 @@ document.getElementById('evaluateGrammarBtn').addEventListener('click', function
     });
 });
 
+// Generar derivaciones
 document.getElementById('generateDerivationsBtn').addEventListener('click', function() {
     const inputString = document.getElementById('input_string').value;
 
@@ -72,34 +104,3 @@ document.getElementById('generateDerivationsBtn').addEventListener('click', func
         console.error('Error:', error);
     });
 });
-
-function parseProductions(productions) {
-    const lines = productions.split('\n');
-    const variables = new Set();
-    const terminals = new Set();
-    let grammar = '';
-
-    lines.forEach(line => {
-        if (line.includes('→')) {
-            const [lhs, rhs] = line.split('→');
-            const variable = lhs.trim();
-            variables.add(variable);
-
-            rhs.split('|').forEach(prod => {
-                prod.trim().split('').forEach(symbol => {
-                    if (/[a-z]/.test(symbol)) {
-                        terminals.add(symbol);
-                    }
-                });
-            });
-
-            grammar += `${line}\n`;
-        }
-    });
-
-    return {
-        variables: Array.from(variables),
-        terminals: Array.from(terminals),
-        grammar: grammar.trim(),
-    };
-}
