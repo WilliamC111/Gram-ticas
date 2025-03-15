@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Evaluador de Gramáticas</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Evaluador de Gramáticas</h1>
+
+        <!-- Sección para ingresar producciones -->
+        <div class="card">
+            <h2>Ingresar Producciones</h2>
+            <table id="productionsTable">
+                <thead>
+                    <tr>
+                        <th>Variable</th>
+                        <th>→</th>
+                        <th>Producción</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><input type="text" class="variable-input" placeholder="Ejemplo: S"></td>
+                        <td>→</td>
+                        <td><input type="text" class="production-input" placeholder="Ejemplo: aB | b"></td>
+                    </tr>
+                </tbody>
+            </table>
+            <button type="button" id="addProductionBtn">Agregar Producción</button>
+        </div>
+
+        <!-- Sección para el símbolo inicial y la cadena a evaluar -->
+        <div class="card">
+            <h2>Símbolo Inicial y Cadena</h2>
+            <label for="start_symbol">Símbolo Inicial (S):</label>
+            <input type="text" id="start_symbol" placeholder="Ejemplo: S" required>
+            <label for="input_string">Cadena a Evaluar:</label>
+            <input type="text" id="input_string" placeholder="Ejemplo: aab" required>
+        </div>
+
+        <!-- Botones principales -->
+        <div class="buttons">
+            <button type="button" id="generateGrammarBtn">Mostrar Gramática</button>
+            <button type="button" id="evaluateGrammarBtn">Evaluar Gramática</button>
+            <button type="button" id="generateDerivationsBtn">Generar Derivaciones</button>
+        </div>
+
+        <!-- Sección para mostrar la gramática generada -->
+        <div class="card">
+            <h2>Gramática Generada</h2>
+            <pre id="generatedGrammar"></pre>
+        </div>
+
+        <!-- Resultados de la evaluación -->
+        <div class="card">
+            <h2>Resultados</h2>
+            <div id="result"></div>
+            <div id="derivations"></div>
+            <div id="grammarType"></div>
+            <div id="derivationTree"></div>
+        </div>
+    </div>
+    <script src="{{ url_for('static', filename='script.js') }}" defer></script>
+</body>
+</html>
