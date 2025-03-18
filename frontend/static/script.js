@@ -15,7 +15,6 @@ document.addEventListener('DOMContentLoaded', function () {
   const grammarTypeDiv = document.getElementById('grammarType');
   const derivationTreeDiv = document.getElementById('derivationTree');
 
-  // Agregar una nueva fila para producciones
   addProductionBtn.addEventListener('click', function () {
     const newRow = productionsTable.insertRow();
     const cell1 = newRow.insertCell(0);
@@ -30,8 +29,6 @@ document.addEventListener('DOMContentLoaded', function () {
       '<input type="text" class="form-control production-input" placeholder="Ejemplo: aB | b">';
   });
 
-  // Mostrar la gramática en formato estructurado
-  // En el evento click de generateGrammarBtn (script.js)
   generateGrammarBtn.addEventListener('click', function () {
     const variables = new Set();
     const terminals = new Set();
@@ -42,6 +39,9 @@ document.addEventListener('DOMContentLoaded', function () {
     for (let row of rows) {
       const variableInput = row.getElementsByClassName('variable-input')[0];
       const productionInput = row.getElementsByClassName('production-input')[0];
+
+      if (!variableInput || !productionInput) continue;
+
       const variable = variableInput.value.trim();
       const production = productionInput.value.trim();
 
@@ -61,18 +61,17 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (/^[a-z]+$/.test(symbol)) {
                   terminals.add(symbol);
                 } else if (/^[A-Z]+$/.test(symbol)) {
-                  variables.add(symbol); // Asegurar que variables se detecten
+                  variables.add(symbol);
                 }
               });
             }
           }
         } else {
-          productions.push(`${variable} → `); // Producción vacía si el input está vacío
+          productions.push(`${variable} → `);
         }
       }
     }
 
-    // Construir gramática con símbolo inicial del input
     const grammarText = `
 T = (${Array.from(terminals).join(', ')})
 N = (${Array.from(variables).join(', ')})
@@ -84,7 +83,6 @@ P = {
     generatedGrammar.textContent = grammarText;
   });
 
-  // Evaluar la gramática
   evaluateGrammarBtn.addEventListener('click', function () {
     const grammar = generatedGrammar.textContent.trim();
     const startSymbol = document.getElementById('start_symbol').value.trim();
@@ -206,14 +204,19 @@ P = {
     const productions = [];
 
     rows.forEach((row) => {
-      const variable = row.querySelector('.variable-input').value;
-      const production = row.querySelector('.production-input').value;
+      const variableInput = row.querySelector('.variable-input');
+      const productionInput = row.querySelector('.production-input');
 
-      if (variable && production) {
-        productions.push({
-          variable: variable,
-          production: production,
-        });
+      if (variableInput && productionInput) {
+        const variable = variableInput.value.trim();
+        const production = productionInput.value.trim();
+
+        if (variable && production) {
+          productions.push({
+            variable: variable,
+            production: production,
+          });
+        }
       }
     });
 
@@ -228,18 +231,20 @@ P = {
 
     if (data.productions && Array.isArray(data.productions)) {
       data.productions.forEach((prod) => {
+        if (!prod || typeof prod !== 'object') return;
+
         const row = productionsTable.insertRow();
         const cell1 = row.insertCell(0);
         const cell2 = row.insertCell(1);
         const cell3 = row.insertCell(2);
 
         cell1.innerHTML = `<input type="text" class="form-control variable-input" value="${
-          prod.variable || ''
+          prod.variable ? prod.variable.replace(/"/g, '&quot;') : ''
         }">`;
         cell2.className = 'text-center align-middle';
         cell2.textContent = '→';
         cell3.innerHTML = `<input type="text" class="form-control production-input" value="${
-          prod.production || ''
+          prod.production ? prod.production.replace(/"/g, '&quot;') : ''
         }">`;
       });
     }
@@ -261,5 +266,9 @@ P = {
     if (data.startSymbol) {
       document.getElementById('start_symbol').value = data.startSymbol;
     }
+  }
+
+  if (productionsTable.children.length === 0) {
+    addProductionBtn.click();
   }
 });
