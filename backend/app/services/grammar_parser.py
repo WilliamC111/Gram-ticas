@@ -27,27 +27,31 @@ def parse_grammar(grammar_text):
             # Dividir lhs y rhs
             lhs, rhs = line.split("→", 1)
             lhs = lhs.strip()
-            rhs = rhs.strip().replace("λ", "")  # Manejar lambda
+            rhs = rhs.strip()
 
-            # Dividir símbolos del rhs considerando mayúsculas
+            # Manejar lambda (λ)
+            if rhs == "λ":
+                if lhs not in productions:
+                    productions[lhs] = []
+                productions[lhs].append([])  # Producción lambda
+                continue
+
+            # Dividir símbolos del rhs
             symbols = []
             current = ""
             for char in rhs:
-                if char == " " and current:
-                    symbols.append(current)
-                    current = ""
-                elif char.isupper() and current and not current.isupper():
-                    symbols.append(current)
-                    current = char
+                if char == " ":
+                    if current:
+                        symbols.append(current)
+                        current = ""
                 else:
                     current += char
             if current:
                 symbols.append(current)
 
             # Agregar a producciones
-            key = tuple(lhs)
-            if key not in productions:
-                productions[key] = []
-            productions[key].append(symbols if symbols else ["λ"])
+            if lhs not in productions:
+                productions[lhs] = []
+            productions[lhs].append(symbols)
 
     return productions
