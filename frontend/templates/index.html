@@ -1,68 +1,205 @@
 <!DOCTYPE html>
 <html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Evaluador de Gramáticas</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-</head>
-<body>
-    <div class="container">
-        <h1>Evaluador de Gramáticas</h1>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css"
+    />
+    <style>
+      .equal-width td,
+      .equal-width th {
+        width: 25%;
+      }
+      .production-input,
+      .variable-input {
+        max-width: 300px;
+        margin: 0 auto;
+      }
+      @media (max-width: 768px) {
+        .table-responsive {
+          overflow-x: auto;
+        }
+        .btn-group-responsive {
+          flex-wrap: wrap;
+          gap: 0.5rem;
+        }
+        .btn-group-responsive .btn {
+          flex: 1 1 45%;
+        }
+      }
+    </style>
+  </head>
+  <body class="bg-light">
+    <div class="container py-4">
+      <h1 class="text-center text-success fw-bold mb-4">Evaluador de Gramáticas</h1>
 
-        <!-- Sección para ingresar producciones -->
-        <div class="card">
-            <h2>Ingresar Producciones</h2>
-            <table id="productionsTable">
-                <thead>
-                    <tr>
-                        <th>Variable</th>
-                        <th>→</th>
-                        <th>Producción</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td><input type="text" class="variable-input" placeholder="Ejemplo: S"></td>
-                        <td>→</td>
-                        <td><input type="text" class="production-input" placeholder="Ejemplo: aB | b"></td>
-                    </tr>
-                </tbody>
-            </table>
-            <button type="button" id="addProductionBtn">Agregar Producción</button>
+      <!-- Sección de producciones -->
+      <div class="card shadow-sm">
+        <div class="card-header bg-white">
+          <h5 class="card-title text-primary mb-0">
+            <i class="bi bi-pencil-square"></i> Ingresar Producciones
+          </h5>
         </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-bordered align-middle equal-width" id="productionsTable">
+              <thead class="table-success">
+                <tr>
+                  <th class="text-center col">Variable (Mayúsculas)</th>
+                  <th class="text-center col-1">→</th>
+                  <th class="text-center col">Producción (vacío = λ)</th>
+                  <th class="text-center col-2">Acción</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>
+                    <input
+                      type="text"
+                      class="form-control variable-input"
+                      placeholder="Ejemplo: S"
+                    />
+                  </td>
+                  <td class="text-center align-middle">→</td>
+                  <td>
+                    <input
+                      type="text"
+                      class="form-control production-input"
+                      placeholder="Ejemplo: aB | b | λ"
+                    />
+                  </td>
+                  <td class="text-center">
+                    <button class="btn btn-danger btn-sm"><i class="bi bi-trash"></i></button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="d-flex flex-wrap gap-2 mt-3 btn-group-responsive">
+            <button type="button" id="addProductionBtn" class="btn btn-success">
+              <i class="bi bi-plus-circle"></i> Agregar
+            </button>
+            <button type="button" id="loadProductionBtn" class="btn btn-outline-primary">
+              <i class="bi bi-upload"></i> Cargar
+            </button>
+            <button type="button" id="downloadProductionBtn" class="btn btn-outline-primary">
+              <i class="bi bi-download"></i> Descargar
+            </button>
+            <input type="file" id="productionFileInput" accept=".json" class="d-none" />
+          </div>
+        </div>
+      </div>
 
-        <!-- Sección para el símbolo inicial y la cadena a evaluar -->
-        <div class="card">
-            <h2>Símbolo Inicial y Cadena</h2>
-            <label for="start_symbol">Símbolo Inicial (S):</label>
-            <input type="text" id="start_symbol" placeholder="Ejemplo: S" required>
-            <label for="input_string">Cadena a Evaluar:</label>
-            <input type="text" id="input_string" placeholder="Ejemplo: aab" required>
+      <!-- Sección de entrada -->
+      <div class="row mt-4 g-3">
+        <div class="col-md-6">
+          <div class="card shadow-sm h-100">
+            <div class="card-header bg-white">
+              <h5 class="card-title text-primary mb-0">
+                <i class="bi bi-arrow-right-circle"></i> Símbolo y Cadena
+              </h5>
+            </div>
+            <div class="card-body">
+              <div class="mb-3">
+                <label for="start_symbol" class="form-label fw-bold">Símbolo Inicial:</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="start_symbol"
+                  placeholder="Ejemplo: S"
+                />
+              </div>
+              <div class="mb-3">
+                <label for="input_string" class="form-label fw-bold">Cadena a Evaluar:</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="input_string"
+                  placeholder="Ejemplo: aab"
+                />
+              </div>
+            </div>
+          </div>
         </div>
 
         <!-- Botones principales -->
-        <div class="buttons">
-            <button type="button" id="generateGrammarBtn">Mostrar Gramática</button>
-            <button type="button" id="evaluateGrammarBtn">Evaluar Gramática</button>
-            <button type="button" id="generateDerivationsBtn">Generar Derivaciones</button>
+        <div class="col-md-6">
+          <div class="row g-3 h-100">
+            <div class="col-12">
+              <button
+                type="button"
+                id="generateGrammarBtn"
+                class="btn btn-success w-100 h-100 py-3"
+              >
+                <i class="bi bi-eye"></i> Mostrar Gramática
+              </button>
+            </div>
+            <div class="col-12">
+              <button
+                type="button"
+                id="evaluateGrammarBtn"
+                class="btn btn-success w-100 h-100 py-3"
+              >
+                <i class="bi bi-gear"></i> Evaluar Cadena
+              </button>
+            </div>
+            <div class="col-12">
+              <button
+                type="button"
+                id="generateDerivationsBtn"
+                class="btn btn-primary w-100 h-100 py-3"
+              >
+                <i class="bi bi-tree"></i> Generar Derivaciones
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Resultados -->
+      <div class="row mt-4 g-3">
+        <div class="col-md-6">
+          <div class="card shadow-sm h-100">
+            <div class="card-header bg-white">
+              <h5 class="card-title text-primary mb-0">
+                <i class="bi bi-file-text"></i> Gramática Generada
+              </h5>
+            </div>
+            <div class="card-body">
+              <pre
+                id="generatedGrammar"
+                class="bg-light p-3 border rounded overflow-auto"
+                style="max-height: 200px"
+              ></pre>
+            </div>
+          </div>
         </div>
 
-        <!-- Sección para mostrar la gramática generada -->
-        <div class="card">
-            <h2>Gramática Generada</h2>
-            <pre id="generatedGrammar"></pre>
+        <div class="col-md-6">
+          <div class="card shadow-sm h-100">
+            <div class="card-header bg-white">
+              <h5 class="card-title text-primary mb-0">
+                <i class="bi bi-check-circle"></i> Resultados
+              </h5>
+            </div>
+            <div class="card-body">
+              <div id="result" class="mb-3 fw-bold text-success"></div>
+              <div id="grammarType" class="mb-3"></div>
+              <div id="derivationTree" class="overflow-auto" style="max-height: 200px"></div>
+            </div>
+          </div>
         </div>
-
-        <!-- Resultados de la evaluación -->
-        <div class="card">
-            <h2>Resultados</h2>
-            <div id="result"></div>
-            <div id="derivations"></div>
-            <div id="grammarType"></div>
-            <div id="derivationTree"></div>
-        </div>
+      </div>
     </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script src="{{ url_for('static', filename='script.js') }}" defer></script>
-</body>
+  </body>
 </html>
