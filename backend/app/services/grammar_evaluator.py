@@ -98,30 +98,15 @@ def check_grammar_type(grammar):
             break
 
     if is_type_3:
-        return "Tipo 3 (Regular)"
+        return "Tipo 3"
 
-    # Verificar Tipo 2 (Libre de Contexto)
-    is_type_2 = True
-    for lhs, rhs_list in productions.items():
-        # 1. Verificar que LHS sea un solo no-terminal
-        if len(lhs) != 1 or not is_non_terminal(lhs[0]):
-            is_type_2 = False
-            break
+    # Verificar Tipo 2 (Context-free)
+    is_type_2 = all(
+        len(lhs) == 1 and is_non_terminal(lhs[0]) for lhs in productions.keys()
+    )
 
-        # 2. Verificar que todas las producciones sean válidas para una gramática libre de contexto
-        for rhs in rhs_list:
-            if not all(is_terminal(s) or is_non_terminal(s) for s in rhs):
-                is_type_2 = False
-                break
+    return "Tipo 2" if is_type_2 else "No es Tipo 2 ni Tipo 3"
 
-        if not is_type_2:
-            break
-
-    if is_type_2:
-        return "Tipo 2 (Libre de Contexto)"
-
-    # Si no es de Tipo 3 ni Tipo 2, no se clasifica
-    return "No es Tipo 2 ni Tipo 3"
 
 # Función principal
 def evaluate_grammar(grammar, start_symbol, input_string):
