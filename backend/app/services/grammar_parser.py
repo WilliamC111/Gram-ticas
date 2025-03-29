@@ -1,6 +1,11 @@
+"""
+Grammar parsing module for processing grammar specifications in formal notation.
+"""
+
+
 def parse_grammar(grammar_text):
     """
-    Parsea una gramática en el formato:
+    Parses a grammar in the format:
     T = (a, b)
     N = (S, B, A)
     S = S
@@ -9,51 +14,54 @@ def parse_grammar(grammar_text):
         ...
     }
 
+    Args:
+        grammar_text (str): Text representation of the grammar
+
     Returns:
-        dict: Diccionario donde las claves son LHS (tupla de símbolos)
-              y los valores son listas de RHS (listas de símbolos)
+        dict: Dictionary where keys are LHS (tuple of symbols)
+              and values are lists of RHS (lists of symbols)
     """
     grammar_text = grammar_text.strip()
     lines = grammar_text.split("\n")
 
-    # Diccionario para almacenar las producciones
+    # Dictionary to store productions
     productions = {}
 
-    # Buscar la sección de producciones
+    # Look for the productions section
     in_production_section = False
     for line in lines:
         line = line.strip()
 
-        # Detectar inicio de sección de producciones
+        # Detect start of productions section
         if "P = {" in line:
             in_production_section = True
             continue
 
-        # Detectar fin de sección de producciones
+        # Detect end of productions section
         if in_production_section and "}" in line:
             break
 
-        # Procesar línea de producción
+        # Process production line
         if in_production_section and "→" in line:
-            # Extraer LHS y RHS
+            # Extract LHS and RHS
             parts = line.split("→", 1)
             if len(parts) == 2:
                 lhs = parts[0].strip()
                 rhs = parts[1].strip()
 
-                # Convertir LHS a tupla de símbolos
+                # Convert LHS to tuple of symbols
                 lhs_tuple = tuple(lhs)
 
-                # Inicializar entrada para este LHS si no existe
+                # Initialize entry for this LHS if it doesn't exist
                 if lhs_tuple not in productions:
                     productions[lhs_tuple] = []
 
-                # Manejar lambda (cadena vacía)
+                # Handle lambda (empty string)
                 if rhs == "λ" or rhs == "epsilon" or rhs == "":
                     productions[lhs_tuple].append(["λ"])
                 else:
-                    # Dividir RHS en símbolos (asumiendo un símbolo por carácter)
-                    # Pero manejar casos como "a B" donde hay espacios
+                    # Split RHS into symbols (assuming one symbol per character)
+                    # But handle cases like "a B" where there are spaces
                     rhs_symbols = []
                     tokens = rhs.split()
                     for token in tokens:
@@ -61,7 +69,7 @@ def parse_grammar(grammar_text):
 
                     productions[lhs_tuple].append(rhs_symbols)
 
-    # Si no se encontraron producciones, intentar un formato alternativo
+    # If no productions were found, try an alternative format
     if not productions:
         for line in lines:
             line = line.strip()
