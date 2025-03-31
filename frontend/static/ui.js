@@ -83,21 +83,38 @@ const UI = {
         </div>`;
 
     UI.elements.grammarTypeDiv.innerHTML = `<h5 class="mt-3">Tipo de Gramática:</h5><div class="fs-5">${data.grammar_type}</div>`;
-
-    // Limpiar el árbol de derivación
-    UI.elements.derivationTreeDiv.innerHTML = '';
+    
+    // No limpiar el árbol de derivación aquí
+    // Regenerar el árbol después de mostrar el resultado
+    if (data.result) {
+      // Sólo regenerar el árbol si la cadena es válida
+      drawTree.generateTree();
+    }
   },
 
   displayDerivationTree: function (data) {
+    // Crear un contenedor para la información del árbol en lugar de reemplazar todo el SVG
+    let infoContainer = document.createElement('div');
+    infoContainer.className = 'tree-info mt-3';
+    
     if (typeof data === 'object') {
-      UI.elements.derivationTreeDiv.innerHTML = `<h5 class="mt-3">Árbol de Derivación:</h5><pre>${JSON.stringify(
+      infoContainer.innerHTML = `<h5>Datos del Árbol de Derivación:</h5><pre>${JSON.stringify(
         data,
         null,
         2,
       )}</pre>`;
     } else {
-      UI.elements.derivationTreeDiv.innerHTML = `<div class="alert alert-info">${data}</div>`;
+      infoContainer.innerHTML = `<div class="alert alert-info">${data}</div>`;
     }
+    
+    // Limpiar información previa si existe
+    const existingInfo = UI.elements.derivationTreeDiv.querySelector('.tree-info');
+    if (existingInfo) {
+      existingInfo.remove();
+    }
+    
+    // Añadir la nueva información sin afectar al SVG
+    UI.elements.derivationTreeDiv.appendChild(infoContainer);
   },
 
   loadProductionsToUI: function (data) {

@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', function () {
   document.getElementById('evaluateGrammarBtn').addEventListener('click', API.evaluateGrammar);
   document
     .getElementById('generateDerivationsBtn')
-    .addEventListener('click', API.generateDerivationTree);
+    .addEventListener('click', drawTree.generateTree);
   document
     .getElementById('loadProductionBtn')
     .addEventListener('click', FileOperations.triggerFileInput);
