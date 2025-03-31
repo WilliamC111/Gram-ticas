@@ -1,172 +1,139 @@
+"""
+Grammar analysis functions for determining grammar types and evaluating strings.
+"""
+
 from .grammar_parser import parse_grammar
-
-
-# Funciones utilitarias (asegurar que reciban strings)
-def is_non_terminal(symbol):
-    """Verifica si un símbolo es no terminal (mayúscula)."""
-    return isinstance(symbol, str) and symbol.isupper()
-
-
-def is_terminal(symbol):
-    """Verifica si un símbolo es terminal (minúscula o número)."""
-    return isinstance(symbol, str) and not symbol.isupper() and symbol != "λ"
-
-
-def is_binary_non_terminal_production(production):
-    """Verifica si una producción es de la forma A → BC."""
-    return (
-        len(production) == 2
-        and is_non_terminal(production[0])
-        and is_non_terminal(production[1])
-    )
-
-
-def is_right_linear_production(production):
-    """Verifica si una producción es lineal derecha (A → aB o A → a)."""
-    return (
-        len(production) == 2
-        and is_terminal(production[0])
-        and is_non_terminal(production[1])
-    ) or (len(production) == 1 and is_terminal(production[0]))
-
-
-def is_left_linear_production(production):
-    """Verifica si una producción es lineal izquierda (A → Ba o A → a)."""
-    return (
-        len(production) == 2
-        and is_non_terminal(production[0])
-        and is_terminal(production[1])
-    ) or (len(production) == 1 and is_terminal(production[0]))
-
-
-def can_derive_empty(symbol, productions):
-    """Verifica si un símbolo puede derivar en cadena vacía."""
-    return symbol in productions and "λ" in productions[symbol]
+from .grammar_classifiers import is_type_3_grammar, is_type_2_grammar
+from .grammar_utils import is_terminal, is_non_terminal
 
 
 def check_grammar_type(grammar):
-    """Determina el tipo de gramática según la jerarquía de Chomsky."""
-    productions = parse_grammar(grammar)
+    """
+    Determines the grammar type according to the Chomsky hierarchy.
 
-    # Verificar Tipo 3 (Regular)
-    is_type_3 = True
-    linear_type = None  # 'right', 'left' o None
+    Args:
+        grammar: Grammar specification string
 
-    for lhs, rhs_list in productions.items():
-        # 1. Verificar que LHS sea un solo no-terminal
-        if len(lhs) != 1 or not is_non_terminal(lhs[0]):
-            is_type_3 = False
-            break
+    Returns:
+        str: Grammar type description (Type 3, Type 2, or error message)
+    """
+    try:
+        productions = parse_grammar(grammar)
 
-        for rhs in rhs_list:
-            # 2. Validar longitud máxima de 2 símbolos
-            if len(rhs) > 2:
-                is_type_3 = False
-                break
+        # If no productions, we can't determine the type
+        if not productions:
+            return "Empty grammar or incorrect format"
 
-            # Caso lambda (A → λ)
-            if rhs == ["λ"]:
-                continue
+        # First check Type 3 (Regular) as it's more restrictive
+        is_type_3, _ = is_type_3_grammar(productions)
+        if is_type_3:
+            return "Tipo 3"
 
-            # 3. Producción de 1 símbolo (A → a)
-            if len(rhs) == 1:
-                if not is_terminal(rhs[0]):
-                    is_type_3 = False
-                    break
+        # If not Type 3, check Type 2 (Context-Free)
+        if is_type_2_grammar(productions):
+            return "Tipo 2"
 
-            # 4. Producción de 2 símbolos (A → aB o A → Ba)
-            elif len(rhs) == 2:
-                # Right-linear (A → aB)
-                if is_terminal(rhs[0]) and is_non_terminal(rhs[1]):
-                    if linear_type not in (None, "right"):
-                        is_type_3 = False
-                        break
-                    linear_type = "right"
-
-                # Left-linear (A → Ba)
-                elif is_non_terminal(rhs[0]) and is_terminal(rhs[1]):
-                    if linear_type not in (None, "left"):
-                        is_type_3 = False
-                        break
-                    linear_type = "left"
-
-                else:
-                    is_type_3 = False
-                    break
-
-        if not is_type_3:
-            break
-
-    if is_type_3:
-        return "Tipo 3"
-
-    # Verificar Tipo 2 (Context-free)
-    is_type_2 = all(
-        len(lhs) == 1 and is_non_terminal(lhs[0]) for lhs in productions.keys()
-    )
-
-    return "Tipo 2" if is_type_2 else "No es Tipo 2 ni Tipo 3"
+        # If neither Type 2 nor Type 3
+        return "No es tipo 2 ni tipo 3"
+    except Exception as e:
+        return f"Error analyzing grammar: {str(e)}"
 
 
-# Función principal
 def evaluate_grammar(grammar, start_symbol, input_string):
-    """Evalúa una gramática y devuelve si la cadena es aceptada."""
-    productions = parse_grammar(grammar)
+    """
+    Evaluates a grammar and determines if it accepts a string.
 
-    def derive(symbol, string):
-        # Caso base: cadena vacía
-        if not string:
-            return symbol in productions and [] in productions[symbol]
+    This implementation handles productions of any length and includes
+    an implicit λ for the start symbol.
 
-        # Si el símbolo tiene producciones
-        if symbol in productions:
-            for production in productions[symbol]:
-                # Verificar si la producción coincide con el inicio de la cadena
-                if not production:
-                    continue  # Ignorar producciones lambda a menos que la cadena esté vacía
+    Args:
+        grammar: Grammar specification string
+        start_symbol: Start symbol of the grammar
+        input_string: Input string to evaluate
 
-                # Verificar coincidencia símbolo por símbolo
-                match = True
-                remaining_string = string
-                derived_symbols = []
+    Returns:
+        dict: Result dictionary containing:
+            - result: Boolean indicating if the grammar accepts the string
+            - grammar_type: The type of the grammar
+            - error: Error message (if any)
+    """
+    try:
+        productions = parse_grammar(grammar)
 
-                for s in production:
-                    if is_terminal(s):
-                        if remaining_string.startswith(s):
-                            remaining_string = remaining_string[len(s):]
-                            derived_symbols.append(s)
-                        else:
-                            match = False
-                            break
-                    else:
-                        derived_symbols.append(s)
+        if not productions:
+            return {
+                "result": False,
+                "grammar_type": "Empty grammar or incorrect format",
+                "error": "No valid productions found",
+            }
 
-                if match:
-                    # Si no hay símbolos no terminales, verificar si la cadena se consumió completamente
-                    if not derived_symbols:
-                        return remaining_string == ""
+        # Check start symbol
+        start_symbol_tuple = tuple(start_symbol)
+        if start_symbol_tuple not in productions:
+            return {
+                "result": False,
+                "grammar_type": check_grammar_type(grammar),
+                "error": f"Start symbol '{start_symbol}' does not exist",
+            }
 
-                    # Derivar recursivamente símbolos no terminales
-                    current_remaining = remaining_string
-                    for i in range(len(derived_symbols)):
-                        current_symbol = derived_symbols[i]
-                        if is_non_terminal(current_symbol):
-                            if derive(current_symbol, current_remaining):
+        # Add implicit λ to the start symbol if it doesn't exist
+        if ["λ"] not in productions[start_symbol_tuple]:
+            productions[start_symbol_tuple].append(["λ"])
+
+        # New derive implementation using memoization
+        memo = {}
+
+        def derive(symbols, remaining_str):
+            """
+            Recursive function to derive a string from a grammar.
+
+            Uses dynamic programming (memoization) to avoid recalculating
+            the same sub-problems.
+
+            Args:
+                symbols: List of symbols to derive
+                remaining_str: Remaining string to match
+
+            Returns:
+                bool: True if the string can be derived, False otherwise
+            """
+            key = (tuple(symbols), remaining_str)
+            if key in memo:
+                return memo[key]
+
+            # Base case: both empty
+            if not symbols and not remaining_str:
+                return True
+
+            # Lambda handling
+            if symbols and symbols[0] == "λ":
+                return derive(symbols[1:], remaining_str)
+
+            # Terminal case
+            if symbols and is_terminal(symbols[0]):
+                if remaining_str.startswith(symbols[0]):
+                    return derive(symbols[1:], remaining_str[len(symbols[0]) :])
+                return False
+
+            # Non-terminal case
+            if symbols and is_non_terminal(symbols[0]):
+                nt = tuple([symbols[0]])
+                if nt not in productions:
+                    return False
+
+                for production in productions[nt]:
+                    # Try all possible string splits
+                    for split_pos in range(len(remaining_str) + 1):
+                        if derive(production + symbols[1:], remaining_str[:split_pos]):
+                            if derive([], remaining_str[split_pos:]):
+                                memo[key] = True
                                 return True
-                        else:
-                            if current_remaining.startswith(current_symbol):
-                                current_remaining = current_remaining[len(current_symbol):]
-                            else:
-                                break
-                    else:
-                        if current_remaining == "":
-                            return True
-        return False
 
-    result = derive(start_symbol, input_string)
-    grammar_type = check_grammar_type(grammar)
+            memo[key] = False
+            return False
 
-    return {
-        "result": result,
-        "grammar_type": grammar_type,
-    }
+        result = derive([start_symbol], input_string)
+        return {"result": result, "grammar_type": check_grammar_type(grammar)}
+
+    except Exception as e:
+        return {"result": False, "grammar_type": "Error", "error": f"Error: {str(e)}"}
