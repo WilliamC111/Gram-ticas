@@ -1,5 +1,6 @@
 const drawTree = {
     generateTree: function () {
+      document.getElementById('generateDerivationsBtn').disabled = true;
       Grammar.generateGrammar();
 
       // Obtengo el json con la abstraccion

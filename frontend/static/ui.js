@@ -88,7 +88,11 @@ const UI = {
     // Regenerar el árbol después de mostrar el resultado
     if (data.result) {
       // Sólo regenerar el árbol si la cadena es válida
-      drawTree.generateTree();
+      //drawTree.generateTree();
+      UI.elements.derivationTreeDiv.innerHTML = "<svg></svg>";
+      document.getElementById('generateDerivationsBtn').disabled = false;
+    }else{
+      UI.elements.derivationTreeDiv.innerHTML = "<svg></svg>";
     }
   },
 
