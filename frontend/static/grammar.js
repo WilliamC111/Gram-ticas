@@ -20,21 +20,19 @@ const Grammar = {
       const production = productionInput.value.trim();
 
       if (variable) {
-        // Variable es obligatoria
         variables.add(variable);
 
-        // Procesar incluso si la producción está vacía (epsilon)
         const alternatives = production.split('|').map((alt) => alt.trim());
 
-        // Si no hay producción, agregar epsilon
         if (alternatives.length === 0) alternatives.push('');
 
         for (const alt of alternatives) {
           if (alt === '') {
-            // Producción vacía = epsilon
             productions.push(`${variable} → λ`);
           } else {
-            const symbols = alt.split(/(?=[A-Z])|\B/).filter((c) => c !== '' && c !== 'λ');
+            const symbols = alt
+              .split(/(?=[A-Z])|\B/)
+              .filter((c) => c !== '' && c !== 'λ');
             if (symbols.length === 0) {
               productions.push(`${variable} → λ`);
             } else {
@@ -53,7 +51,9 @@ const Grammar = {
       }
     }
 
-    const filteredProductions = productions.filter((prod) => prod.trim() !== '');
+    const filteredProductions = productions.filter(
+      (prod) => prod.trim() !== '',
+    );
     const grammarText = `
     T = (${Array.from(terminals).join(', ')})
     N = (${Array.from(variables).join(', ')})

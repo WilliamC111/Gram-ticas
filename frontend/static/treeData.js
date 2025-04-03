@@ -1,98 +1,131 @@
 const treeData = {
-    generateTreeData: function () {
-      // Obtengo mis producciones parseadas
-      const rules = parseProductions.generateParse();
-      const symbol = document.getElementById('start_symbol').value.trim();
-      const word = document.getElementById('input_string').value.trim();
-      
-      // Usamos un enfoque más robusto para la derivación
-      function derive(symbol, targetWord, history, remainingPath = []) {
-        // Evitar recursión infinita
-        if (history.length > 100) return null;
-        
-        // Caso base: si el símbolo es terminal, verificar si coincide con el inicio de la palabra
-        if (!rules[symbol]) {
-          if (targetWord.startsWith(symbol)) {
-            return { 
-              name: symbol, 
-              children: [],
-              consumedLength: symbol.length
-            };
-          }
-          return null;
+  generateTreeData: function () {
+    const rules = parseProductions.generateParse();
+    const startSymbol = document.getElementById('start_symbol').value.trim();
+    const inputString = document.getElementById('input_string').value.trim();
+
+    console.log('Parsed rules:', rules); // Debug output
+    console.log('Start symbol:', startSymbol);
+    console.log('Input string:', inputString);
+
+    const chart = new Map();
+
+    const tree = this.deriveString(
+      rules,
+      startSymbol,
+      inputString,
+      0,
+      inputString.length,
+      chart,
+    );
+
+    console.log('Generated tree:', tree);
+    return tree
+      ? {
+          ...tree,
+          _isRoot: true,
         }
-        
-        // Verificar todas las producciones para este símbolo
-        for (let production of rules[symbol]) {
-          const parts = production.split(" ").filter(part => part.length > 0);
-          
-          // Intentar hacer coincidir esta producción con la palabra
-          const result = matchProduction(parts, targetWord, [...history, symbol]);
-          if (result) {
-            return {
-              name: symbol,
-              children: result.children,
-              consumedLength: result.consumedLength
-            };
-          }
-        }
-        
-        return null;
+      : null;
+  },
+
+  deriveString: function (rules, symbol, input, start, end, chart) {
+    const key = `${symbol}:${start}:${end}`;
+    if (chart.has(key)) {
+      return chart.get(key);
+    }
+
+    if (!rules[symbol]) {
+      if (start + 1 === end && input[start] === symbol) {
+        const node = { name: symbol, children: [] };
+        chart.set(key, node);
+        return node;
       }
-  
-      function matchProduction(parts, targetWord, history) {
-        let children = [];
-        let remainingWord = targetWord;
-        let totalConsumed = 0;
-        
-        // Intentar hacer coincidir cada parte de la producción
-        for (let i = 0; i < parts.length; i++) {
-          const part = parts[i];
-          
-          // Derivar esta parte (ya sea terminal o no terminal)
-          const subtree = derive(part, remainingWord, history);
-          
-          // Si no podemos derivar esta parte, esta producción no funciona
-          if (!subtree) return null;
-          
-          children.push(subtree);
-          const consumed = subtree.consumedLength;
-          
-          // Actualizar la palabra restante y el total consumido
-          remainingWord = remainingWord.substring(consumed);
-          totalConsumed += consumed;
-        }
-        
-        // Si no hemos consumido toda la palabra objetivo, esta derivación no es válida
-        if (children.length > 0 && totalConsumed === targetWord.length) {
-          return {
-            children: children,
-            consumedLength: totalConsumed
-          };
-        }
-        
-        return null;
+      chart.set(key, null);
+      return null;
+    }
+
+    for (const production of rules[symbol]) {
+      const symbols = production.split(/\s+/).filter((s) => s.length > 0);
+
+      if (symbols.length === 0) continue;
+
+      const result = this.matchProduction(
+        rules,
+        symbols,
+        input,
+        start,
+        end,
+        chart,
+      );
+      if (result) {
+        const node = { name: symbol, children: result };
+        chart.set(key, node);
+        return node;
       }
-      
-      // Generar el árbol de derivación
-      const tree = derive(symbol, word, []);
-      
-      // Limpiar el árbol para la visualización (eliminar propiedades auxiliares)
-      function cleanTree(node) {
-        if (!node) return null;
-        
-        const cleanNode = {
-          name: node.name,
-          children: []
-        };
-        
-        if (node.children && node.children.length > 0) {
-          cleanNode.children = node.children.map(child => cleanTree(child));
+    }
+
+    chart.set(key, null);
+    return null;
+  },
+
+  matchProduction: function (rules, symbols, input, start, end, chart) {
+    if (symbols.length === 1) {
+      const subtree = this.deriveString(
+        rules,
+        symbols[0],
+        input,
+        start,
+        end,
+        chart,
+      );
+      return subtree ? [subtree] : null;
+    }
+
+    return this.partitionInput(rules, symbols, input, start, end, 0, [], chart);
+  },
+
+  partitionInput: function (
+    rules,
+    symbols,
+    input,
+    start,
+    end,
+    symbolIndex,
+    result,
+    chart,
+  ) {
+    if (symbolIndex === symbols.length) {
+      return start === end ? result : null;
+    }
+
+    for (let mid = start + 1; mid <= end; mid++) {
+      const subtree = this.deriveString(
+        rules,
+        symbols[symbolIndex],
+        input,
+        start,
+        mid,
+        chart,
+      );
+
+      if (subtree) {
+        const remaining = this.partitionInput(
+          rules,
+          symbols,
+          input,
+          mid,
+          end,
+          symbolIndex + 1,
+          [...result, subtree],
+          chart,
+        );
+
+        if (remaining) {
+          return remaining;
         }
-        
-        return cleanNode;
       }
-      
-      return tree ? cleanTree(tree) : null;
-    },
-  };
+    }
+
+    return null;
+  },
+};
