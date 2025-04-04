@@ -4,6 +4,6 @@ const Validation = {
   },
 
   validateProductionInput: function (input) {
-    input.value = input.value.replace(/[^A-Za-z|λ\s]/g, '');
-  },
+    input.value = input.value.replace(/[^A-Za-z0-9|λ\s]/g, '');
+},
 };
