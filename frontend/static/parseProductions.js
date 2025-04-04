@@ -17,7 +17,6 @@ const parseProductions = {
       }
 
       if (insideProductions && line.includes('→')) {
-        // Dividir la línea en el lado izquierdo y derecho de la flecha
         let parts = line.split('→');
         let left = parts[0].trim();
         let right = parts[1].trim();

@@ -4,7 +4,7 @@ const drawTree = {
     Grammar.generateGrammar();
 
     const dataTree = treeData.generateTreeData();
-    console.log('Generated tree data:', dataTree); // Debug output
+    console.log('Generated tree data:', dataTree);
 
     if (!dataTree) {
       d3.select('#derivationTree').select('svg').selectAll('*').remove();
@@ -51,7 +51,7 @@ const drawTree = {
       .append('div')
       .attr('class', 'tree-tooltip')
       .style('position', 'absolute')
-      .style('background', 'rgba(0, 200, 255, 0.9)') // Updated: primary-color with opacity
+      .style('background', 'rgba(0, 200, 255, 0.9)')
       .style('color', 'white')
       .style('padding', '10px')
       .style('border-radius', '6px')
@@ -94,13 +94,13 @@ const drawTree = {
     gradient
       .append('stop')
       .attr('offset', '0%')
-      .attr('stop-color', '#0a192f') // Updated: dark-color
+      .attr('stop-color', '#0a192f')
       .attr('stop-opacity', 0.7);
 
     gradient
       .append('stop')
       .attr('offset', '100%')
-      .attr('stop-color', '#0a192f') // Updated: dark-color
+      .attr('stop-color', '#0a192f')
       .attr('stop-opacity', 0.9);
 
     const linkGenerator = d3
@@ -118,7 +118,7 @@ const drawTree = {
       .attr('class', 'link')
       .attr('d', linkGenerator)
       .attr('fill', 'none')
-      .attr('stroke', 'rgba(0, 200, 255, 0.5)') // Updated: primary-color with opacity
+      .attr('stroke', 'rgba(0, 200, 255, 0.5)')
       .attr('stroke-width', 2)
       .attr('stroke-dasharray', function () {
         return this.getTotalLength();
@@ -156,7 +156,7 @@ const drawTree = {
           .filter((link) => link.source === d || link.target === d)
           .transition()
           .duration(300)
-          .attr('stroke', '#00c8ff') // Updated: primary-color
+          .attr('stroke', '#00c8ff')
           .attr('stroke-width', 3);
 
         tooltip.transition().duration(200).style('opacity', 0.95);
@@ -204,16 +204,14 @@ const drawTree = {
         g.selectAll('.link')
           .transition()
           .duration(300)
-          .attr('stroke', 'rgba(0, 200, 255, 0.5)') // Updated: primary-color with opacity
+          .attr('stroke', 'rgba(0, 200, 255, 0.5)')
           .attr('stroke-width', 2);
 
         tooltip.transition().duration(500).style('opacity', 0);
       });
 
-    // Add filters and effects
     const defs = svg.append('defs');
 
-    // Create a drop shadow filter for better text legibility
     const dropShadow = defs
       .append('filter')
       .attr('id', 'dropShadow')
@@ -228,7 +226,6 @@ const drawTree = {
       .attr('flood-opacity', 0.3)
       .attr('flood-color', '#000');
 
-    // Create a glow effect for the root node
     const filter = defs.append('filter').attr('id', 'glow');
     filter
       .append('feGaussianBlur')
@@ -238,11 +235,9 @@ const drawTree = {
     feMerge.append('feMergeNode').attr('in', 'coloredBlur');
     feMerge.append('feMergeNode').attr('in', 'SourceGraphic');
 
-    // Add node circles with improved colors
     node
       .append('circle')
       .attr('fill', (d) => {
-        // Check if this is the root node (first node in the tree)
         const isRoot = d === root;
         const isTerminal = !d.children && d.data.name.length === 1;
 
@@ -254,18 +249,17 @@ const drawTree = {
           }, parent: ${d.parent ? d.parent.data.name : 'none'}`,
         );
 
-        // Lighter background colors for better text contrast
-        if (isRoot) return '#93c5fd'; // Root node (light blue)
-        if (isTerminal) return '#a7f3d0'; // Terminal node (light green)
-        return '#c7d2fe'; // Non-terminal node (light indigo)
+        if (isRoot) return '#93c5fd';
+        if (isTerminal) return '#a7f3d0';
+        return '#c7d2fe';
       })
       .attr('stroke', (d) => {
         const isRoot = d === root;
         const isTerminal = !d.children && d.data.name.length === 1;
 
-        if (isRoot) return '#3b82f6'; // Root node stroke (blue)
-        if (isTerminal) return '#10b981'; // Terminal node stroke (green)
-        return '#6366f1'; // Non-terminal node stroke (indigo)
+        if (isRoot) return '#3b82f6';
+        if (isTerminal) return '#10b981';
+        return '#6366f1';
       })
       .attr('stroke-width', 2)
       .transition()
@@ -281,7 +275,7 @@ const drawTree = {
       .append('text')
       .attr('dy', '.3em')
       .attr('text-anchor', 'middle')
-      .attr('fill', '#1e293b') // Change to dark text color for better contrast
+      .attr('fill', '#1e293b')
       .attr('font-weight', 'bold')
       .attr('font-family', 'Arial, sans-serif')
       .attr('font-size', (d) => (d.data.name.length > 1 ? '14px' : '16px'))
@@ -299,7 +293,7 @@ const drawTree = {
       .append('circle')
       .attr('r', (d) => (d.data.name.length > 1 ? 32 : 28))
       .attr('fill', 'none')
-      .attr('stroke', 'rgba(99, 102, 241, 0.4)') // Updated: indigo with opacity
+      .attr('stroke', 'rgba(99, 102, 241, 0.4)')
       .attr('stroke-width', 1)
       .attr('stroke-dasharray', '3,3')
       .attr('opacity', 0.4);
@@ -334,7 +328,7 @@ const drawTree = {
         .attr('y1', 0)
         .attr('x2', x)
         .attr('y2', gridHeight)
-        .attr('stroke', 'rgba(0, 200, 255, 0.1)') // Updated: primary-color with opacity
+        .attr('stroke', 'rgba(0, 200, 255, 0.1)')
         .attr('stroke-width', 1)
         .attr('opacity', 0)
         .transition()
@@ -350,7 +344,7 @@ const drawTree = {
         .attr('y1', y)
         .attr('x2', gridWidth)
         .attr('y2', y)
-        .attr('stroke', 'rgba(0, 200, 255, 0.1)') // Updated: primary-color with opacity
+        .attr('stroke', 'rgba(0, 200, 255, 0.1)')
         .attr('stroke-width', 1)
         .attr('opacity', 0)
         .transition()
@@ -370,8 +364,8 @@ const drawTree = {
       .attr('height', 45)
       .attr('rx', 8)
       .attr('ry', 8)
-      .attr('fill', 'rgba(10, 25, 47, 0.7)') // Updated: dark-color with opacity
-      .attr('stroke', 'rgba(0, 200, 255, 0.3)') // Updated: primary-color with opacity
+      .attr('fill', 'rgba(10, 25, 47, 0.7)')
+      .attr('stroke', 'rgba(0, 200, 255, 0.3)')
       .attr('stroke-width', 1)
       .attr('filter', 'drop-shadow(0px 2px 3px rgba(0,0,0,0.1))');
 
@@ -386,8 +380,8 @@ const drawTree = {
     zoomIn
       .append('circle')
       .attr('r', 16)
-      .attr('fill', '#7b2cbf') // Updated: secondary-color
-      .attr('stroke', '#00c8ff') // Updated: primary-color
+      .attr('fill', '#7b2cbf')
+      .attr('stroke', '#00c8ff')
       .attr('stroke-width', 2)
       .attr('class', 'control-circle');
 
@@ -411,8 +405,8 @@ const drawTree = {
     zoomOut
       .append('circle')
       .attr('r', 16)
-      .attr('fill', '#7b2cbf') // Updated: secondary-color
-      .attr('stroke', '#00c8ff') // Updated: primary-color
+      .attr('fill', '#7b2cbf')
+      .attr('stroke', '#00c8ff')
       .attr('stroke-width', 2)
       .attr('class', 'control-circle');
 
@@ -436,8 +430,8 @@ const drawTree = {
     reset
       .append('circle')
       .attr('r', 16)
-      .attr('fill', '#7b2cbf') // Updated: secondary-color
-      .attr('stroke', '#00c8ff') // Updated: primary-color
+      .attr('fill', '#7b2cbf')
+      .attr('stroke', '#00c8ff')
       .attr('stroke-width', 2)
       .attr('class', 'control-circle');
 
@@ -480,8 +474,8 @@ const drawTree = {
     fitScreen
       .append('circle')
       .attr('r', 16)
-      .attr('fill', '#7b2cbf') // Updated: secondary-color
-      .attr('stroke', '#00c8ff') // Updated: primary-color
+      .attr('fill', '#7b2cbf')
+      .attr('stroke', '#00c8ff')
       .attr('stroke-width', 2)
       .attr('class', 'control-circle');
 
@@ -505,8 +499,8 @@ const drawTree = {
       .attr('height', 90)
       .attr('rx', 8)
       .attr('ry', 8)
-      .attr('fill', 'rgba(255, 255, 255, 0.9)') // Light background for better readability
-      .attr('stroke', 'rgba(99, 102, 241, 0.3)') // Indigo with opacity
+      .attr('fill', 'rgba(255, 255, 255, 0.9)')
+      .attr('stroke', 'rgba(99, 102, 241, 0.3)')
       .attr('stroke-width', 1)
       .attr('filter', 'drop-shadow(0px 2px 3px rgba(0,0,0,0.1))');
 
@@ -517,8 +511,8 @@ const drawTree = {
     terminalLegend
       .append('circle')
       .attr('r', 10)
-      .attr('fill', '#a7f3d0') // Light green (matches the new terminal node color)
-      .attr('stroke', '#10b981') // Green stroke
+      .attr('fill', '#a7f3d0')
+      .attr('stroke', '#10b981')
       .attr('stroke-width', 2);
 
     terminalLegend
@@ -526,7 +520,7 @@ const drawTree = {
       .attr('x', 20)
       .attr('dy', '.35em')
       .attr('font-size', '12px')
-      .attr('fill', '#1e293b') // Dark text for better readability
+      .attr('fill', '#1e293b')
       .text('Terminal');
 
     const nonTerminalLegend = legend
@@ -536,8 +530,8 @@ const drawTree = {
     nonTerminalLegend
       .append('circle')
       .attr('r', 10)
-      .attr('fill', '#c7d2fe') // Light indigo (matches the new non-terminal node color)
-      .attr('stroke', '#6366f1') // Indigo stroke
+      .attr('fill', '#c7d2fe')
+      .attr('stroke', '#6366f1')
       .attr('stroke-width', 2);
 
     nonTerminalLegend
@@ -545,7 +539,7 @@ const drawTree = {
       .attr('x', 20)
       .attr('dy', '.35em')
       .attr('font-size', '12px')
-      .attr('fill', '#1e293b') // Dark text for better readability
+      .attr('fill', '#1e293b')
       .text('No terminal');
 
     const rootLegend = legend
@@ -555,8 +549,8 @@ const drawTree = {
     rootLegend
       .append('circle')
       .attr('r', 10)
-      .attr('fill', '#93c5fd') // Light blue (matches the new root node color)
-      .attr('stroke', '#3b82f6') // Blue stroke
+      .attr('fill', '#93c5fd')
+      .attr('stroke', '#3b82f6')
       .attr('stroke-width', 2);
 
     rootLegend
@@ -564,7 +558,7 @@ const drawTree = {
       .attr('x', 20)
       .attr('dy', '.35em')
       .attr('font-size', '12px')
-      .attr('fill', '#1e293b') // Dark text for better readability
+      .attr('fill', '#1e293b')
       .text('Raíz');
 
     const style = document.createElement('style');

@@ -1,4 +1,3 @@
-// Módulo para manejar la generación de gramáticas
 const Grammar = {
   generateGrammar: function () {
     const variables = new Set();

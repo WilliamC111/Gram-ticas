@@ -4,7 +4,7 @@ const treeData = {
     const startSymbol = document.getElementById('start_symbol').value.trim();
     const inputString = document.getElementById('input_string').value.trim();
 
-    console.log('Parsed rules:', rules); // Debug output
+    console.log('Parsed rules:', rules);
     console.log('Start symbol:', startSymbol);
     console.log('Input string:', inputString);
 
@@ -19,7 +19,6 @@ const treeData = {
       chart,
     );
 
-    // Mark the root node
     if (tree) {
       tree._isRoot = true;
     }
