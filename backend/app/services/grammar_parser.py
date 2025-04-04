@@ -1,25 +1,20 @@
 """
 Grammar parsing module for processing grammar specifications in formal notation.
+
+Ver docs/grammar_parser_docs.py para documentación detallada.
 """
 
 
 def parse_grammar(grammar_text):
     """
-    Parses a grammar in the format:
-    T = (a, b)
-    N = (S, B, A)
-    S = S
-    P = {
-        S → a B
-        ...
-    }
-
+    Analiza y procesa una gramática formal especificada en notación matemática estándar.
+    
+    Ver docs/grammar_parser_docs.py (PARSE_GRAMMAR_DOCS) para documentación detallada.
+    
     Args:
-        grammar_text (str): Text representation of the grammar
-
+        grammar_text (str): Representación textual de la gramática formal
     Returns:
-        dict: Dictionary where keys are LHS (tuple of symbols)
-              and values are lists of RHS (lists of symbols)
+        dict: Diccionario de producciones donde LHS son tuplas y RHS son listas de listas
     """
     grammar_text = grammar_text.strip()
     lines = grammar_text.split("\n")

@@ -1,43 +1,47 @@
 """
 Utility functions for grammar symbol classification.
-These functions help identify terminal and non-terminal symbols in grammars.
+
+Ver docs/grammar_utils_docs.py para documentación detallada.
 """
 
 
 def is_non_terminal(symbol):
     """
-    Checks if a symbol is non-terminal (uppercase).
-
+    Verifica si un símbolo es no terminal (letra mayúscula).
+    
+    Ver docs/grammar_utils_docs.py (IS_NON_TERMINAL_DOCS) para documentación detallada.
+    
     Args:
-        symbol: The symbol to check
-
+        symbol (str): El símbolo a verificar
     Returns:
-        bool: True if the symbol is a non-terminal (uppercase), False otherwise
+        bool: True si el símbolo es no terminal, False en caso contrario
     """
     return isinstance(symbol, str) and symbol.isupper()
 
 
 def is_terminal(symbol):
     """
-    Checks if a symbol is terminal (lowercase or number, not lambda).
-
+    Verifica si un símbolo es terminal (letra minúscula o número, no lambda).
+    
+    Ver docs/grammar_utils_docs.py (IS_TERMINAL_DOCS) para documentación detallada.
+    
     Args:
-        symbol: The symbol to check
-
+        symbol (str): El símbolo a verificar
     Returns:
-        bool: True if the symbol is a terminal, False otherwise
+        bool: True si el símbolo es terminal, False en caso contrario
     """
     return isinstance(symbol, str) and not symbol.isupper() and symbol != "λ"
 
 
 def is_lambda(symbol):
     """
-    Checks if a symbol is lambda (empty string).
-
+    Verifica si un símbolo representa lambda (la cadena vacía).
+    
+    Ver docs/grammar_utils_docs.py (IS_LAMBDA_DOCS) para documentación detallada.
+    
     Args:
-        symbol: The symbol to check
-
+        symbol (str): El símbolo a verificar
     Returns:
-        bool: True if the symbol is lambda, False otherwise
+        bool: True si el símbolo es lambda, False en caso contrario
     """
     return symbol == "λ"

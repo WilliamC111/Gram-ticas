@@ -1,5 +1,7 @@
 """
 Grammar analysis functions for determining grammar types and evaluating strings.
+
+Ver docs/grammar_evaluator_docs.py para documentación detallada.
 """
 
 from .grammar_parser import parse_grammar
@@ -9,13 +11,14 @@ from .grammar_utils import is_terminal, is_non_terminal
 
 def check_grammar_type(grammar):
     """
-    Determines the grammar type according to the Chomsky hierarchy.
-
+    Determina el tipo de gramática según la jerarquía de Chomsky.
+    
+    Ver docs/grammar_evaluator_docs.py (CHECK_GRAMMAR_TYPE_DOCS) para documentación detallada.
+    
     Args:
-        grammar: Grammar specification string
-
+        grammar (str): Cadena de texto con la especificación de la gramática
     Returns:
-        str: Grammar type description (Type 3, Type 2, or error message)
+        str: Descripción del tipo de gramática ("Tipo 3", "Tipo 2", etc.)
     """
     try:
         productions = parse_grammar(grammar)
@@ -41,8 +44,16 @@ def check_grammar_type(grammar):
 
 def evaluate_grammar(grammar, start_symbol, input_string):
     """
-    Evalúa una gramática y determina si acepta una cadena.
-    Utiliza un enfoque con limitación estricta de profundidad para evitar recursión infinita.
+    Evalúa una gramática y determina si acepta una cadena de entrada.
+    
+    Ver docs/grammar_evaluator_docs.py (EVALUATE_GRAMMAR_DOCS) para documentación detallada.
+    
+    Args:
+        grammar (str): Cadena de texto con la especificación de la gramática
+        start_symbol (str): Símbolo inicial de la gramática
+        input_string (str): Cadena de entrada a evaluar
+    Returns:
+        dict: Resultado de la evaluación con campos result, grammar_type y opcionalmente error
     """
     try:
         productions = parse_grammar(grammar)

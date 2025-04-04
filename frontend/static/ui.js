@@ -27,73 +27,119 @@ const UI = {
 
     // Asegurar que hay al menos una fila de producción
     if (this.elements.productionsTable.children.length === 0) {
-      this.addProductionRow();
+      this.addNewRow();
     }
   },
 
-  addProductionRow: function () {
-    const newRow = UI.elements.productionsTable.insertRow();
+  addNewRow: function () {
+    const tableBody = document.querySelector('#productionsTable tbody');
+    const newRow = tableBody.insertRow();
+    
+    // Add hover class to make it interactive
+    newRow.className = 'hover:bg-gray-50 transition-colors';
+    
     const cell1 = newRow.insertCell(0);
     const cell2 = newRow.insertCell(1);
     const cell3 = newRow.insertCell(2);
     const cell4 = newRow.insertCell(3);
 
+    // Style the cells
+    cell1.className = 'p-3 border-b border-gray-100';
+    cell2.className = 'p-3 text-center align-middle border-b border-gray-100';
+    cell3.className = 'p-3 border-b border-gray-100';
+    cell4.className = 'p-3 text-center border-b border-gray-100';
+
     // Variable input
     const variableInput = document.createElement('input');
     variableInput.type = 'text';
-    variableInput.className = 'form-control variable-input';
+    variableInput.className = 'w-full bg-white border border-gray-200 rounded-md px-3 py-2 text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-colors variable-input';
     variableInput.placeholder = 'Ejemplo: S';
-    variableInput.addEventListener('input', () => Validation.validateVariableInput(variableInput));
+    variableInput.addEventListener('input', () =>
+      Validation.validateVariableInput(variableInput),
+    );
     cell1.appendChild(variableInput);
 
-    // Símbolo →
-    cell2.className = 'text-center align-middle';
-    cell2.textContent = '→';
+    // Arrow
+    const arrowSpan = document.createElement('span');
+    arrowSpan.className = 'text-primary font-bold text-lg';
+    arrowSpan.textContent = '→';
+    cell2.appendChild(arrowSpan);
 
     // Production input
     const productionInput = document.createElement('input');
     productionInput.type = 'text';
-    productionInput.className = 'form-control production-input';
-    productionInput.placeholder = 'Ejemplo: aB | b';
+    productionInput.className = 'w-full bg-white border border-gray-200 rounded-md px-3 py-2 text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-colors production-input';
+    productionInput.placeholder = 'Ejemplo: aB | b | λ';
     productionInput.addEventListener('input', () =>
       Validation.validateProductionInput(productionInput),
     );
     cell3.appendChild(productionInput);
 
     // Delete button
-    cell4.className = 'text-center align-middle';
     cell4.appendChild(UI.createDeleteButton(newRow));
+    
+    // Focus on the first input to make it clear this is a new row
+    setTimeout(() => variableInput.focus(), 50);
+    
+    // Scroll to the bottom of the table to make the new row visible
+    const tableContainer = document.querySelector('.overflow-x-auto');
+    if (tableContainer) {
+      tableContainer.scrollTop = tableContainer.scrollHeight;
+    }
   },
 
   createDeleteButton: function (row) {
     const deleteBtn = document.createElement('button');
-    deleteBtn.className = 'btn btn-danger btn-sm';
+    deleteBtn.className = 'p-2 rounded-full bg-danger/10 hover:bg-danger/20 transition-colors text-danger';
     deleteBtn.innerHTML = '<i class="bi bi-trash"></i>';
+    deleteBtn.title = 'Eliminar fila';
     deleteBtn.addEventListener('click', function () {
-      row.remove();
+      // Add animation before removing
+      row.style.transition = 'all 0.3s';
+      row.style.opacity = '0';
+      row.style.transform = 'translateX(10px)';
+      
+      setTimeout(() => {
+        row.remove();
+      }, 300);
     });
     return deleteBtn;
   },
 
   displayResult: function (data) {
-    UI.elements.resultDiv.innerHTML = `<div class="alert ${
-      data.result ? 'alert-success' : 'alert-danger'
-    }">
-            Resultado: ${data.result ? 'Válida' : 'No válida'}
-        </div>`;
-
-    UI.elements.grammarTypeDiv.innerHTML = `<h5 class="mt-3">Tipo de Gramática:</h5><div class="fs-5">${data.grammar_type}</div>`;
+    const deriveBtn = document.getElementById('generateDerivationsBtn');
     
-    // No limpiar el árbol de derivación aquí
-    // Regenerar el árbol después de mostrar el resultado
+    // Limpiar el árbol de derivación en cualquier caso
+    UI.elements.derivationTreeDiv.innerHTML = "<svg></svg>";
+    
     if (data.result) {
-      // Sólo regenerar el árbol si la cadena es válida
-      //drawTree.generateTree();
-      UI.elements.derivationTreeDiv.innerHTML = "<svg></svg>";
-      document.getElementById('generateDerivationsBtn').disabled = false;
-    }else{
-      UI.elements.derivationTreeDiv.innerHTML = "<svg></svg>";
+      // Si la cadena es válida
+      UI.elements.resultDiv.innerHTML = `
+        <div class="text-success font-medium flex items-center gap-2">
+          <i class="bi bi-check-circle-fill"></i> Resultado: Válida
+        </div>
+        <div class="bg-success/10 text-success rounded px-3 py-2 text-sm mt-2 flex items-center gap-2">
+          <i class="bi bi-info-circle"></i> Puede generar el árbol de derivación ahora
+        </div>
+      `;
+      
+      // Habilitar el botón de derivaciones y añadir una animación sutil para llamar la atención
+      deriveBtn.disabled = false;
+      deriveBtn.classList.add('animate-pulse');
+      setTimeout(() => deriveBtn.classList.remove('animate-pulse'), 1500);
+    } else {
+      // Si la cadena no es válida
+      UI.elements.resultDiv.innerHTML = `
+        <div class="text-danger font-medium flex items-center gap-2">
+          <i class="bi bi-x-circle-fill"></i> Resultado: No válida
+        </div>
+      `;
+      
+      // Desactivar explícitamente el botón
+      deriveBtn.disabled = true;
     }
+
+    UI.elements.grammarTypeDiv.innerHTML = `<div class="text-gray-700 mt-2">Tipo de Gramática: <span class="font-medium">${data.grammar_type}</span></div>`;
   },
 
   displayDerivationTree: function (data) {

@@ -19,13 +19,12 @@ const treeData = {
       chart,
     );
 
-    console.log('Generated tree:', tree);
-    return tree
-      ? {
-          ...tree,
-          _isRoot: true,
-        }
-      : null;
+    // Mark the root node
+    if (tree) {
+      tree._isRoot = true;
+    }
+
+    return tree;
   },
 
   deriveString: function (rules, symbol, input, start, end, chart) {
