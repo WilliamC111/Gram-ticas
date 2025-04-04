@@ -12,92 +12,147 @@ const UI = {
   },
 
   init: function () {
-    // Inicializar referencias a elementos del DOM
     this.elements.productionsTable = document
       .getElementById('productionsTable')
       .getElementsByTagName('tbody')[0];
     this.elements.startSymbol = document.getElementById('start_symbol');
     this.elements.inputString = document.getElementById('input_string');
-    this.elements.generatedGrammar = document.getElementById('generatedGrammar');
+    this.elements.generatedGrammar =
+      document.getElementById('generatedGrammar');
     this.elements.resultDiv = document.getElementById('result');
     this.elements.grammarTypeDiv = document.getElementById('grammarType');
     this.elements.derivationsDiv = document.getElementById('derivations');
     this.elements.derivationTreeDiv = document.getElementById('derivationTree');
-    this.elements.productionFileInput = document.getElementById('productionFileInput');
+    this.elements.productionFileInput = document.getElementById(
+      'productionFileInput',
+    );
 
-    // Asegurar que hay al menos una fila de producción
     if (this.elements.productionsTable.children.length === 0) {
-      this.addProductionRow();
+      this.addNewRow();
     }
   },
 
-  addProductionRow: function () {
-    const newRow = UI.elements.productionsTable.insertRow();
+  addNewRow: function () {
+    const tableBody = document.querySelector('#productionsTable tbody');
+    const newRow = tableBody.insertRow();
+
+    newRow.className = 'hover:bg-gray-50 transition-colors';
+
     const cell1 = newRow.insertCell(0);
     const cell2 = newRow.insertCell(1);
     const cell3 = newRow.insertCell(2);
     const cell4 = newRow.insertCell(3);
 
-    // Variable input
+    cell1.className = 'p-3 border-b border-gray-100';
+    cell2.className = 'p-3 text-center align-middle border-b border-gray-100';
+    cell3.className = 'p-3 border-b border-gray-100';
+    cell4.className = 'p-3 text-center border-b border-gray-100';
+
     const variableInput = document.createElement('input');
     variableInput.type = 'text';
-    variableInput.className = 'form-control variable-input';
+    variableInput.className =
+      'w-full bg-white border border-gray-200 rounded-md px-3 py-2 text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-colors variable-input';
     variableInput.placeholder = 'Ejemplo: S';
-    variableInput.addEventListener('input', () => Validation.validateVariableInput(variableInput));
+    variableInput.addEventListener('input', () =>
+      Validation.validateVariableInput(variableInput),
+    );
     cell1.appendChild(variableInput);
 
-    // Símbolo →
-    cell2.className = 'text-center align-middle';
-    cell2.textContent = '→';
+    const arrowSpan = document.createElement('span');
+    arrowSpan.className = 'text-primary font-bold text-lg';
+    arrowSpan.textContent = '→';
+    cell2.appendChild(arrowSpan);
 
-    // Production input
     const productionInput = document.createElement('input');
     productionInput.type = 'text';
-    productionInput.className = 'form-control production-input';
-    productionInput.placeholder = 'Ejemplo: aB | b';
+    productionInput.className =
+      'w-full bg-white border border-gray-200 rounded-md px-3 py-2 text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-colors production-input';
+    productionInput.placeholder = 'Ejemplo: aB | b | λ';
     productionInput.addEventListener('input', () =>
       Validation.validateProductionInput(productionInput),
     );
     cell3.appendChild(productionInput);
 
-    // Delete button
-    cell4.className = 'text-center align-middle';
     cell4.appendChild(UI.createDeleteButton(newRow));
+
+    setTimeout(() => variableInput.focus(), 50);
+
+    const tableContainer = document.querySelector('.overflow-x-auto');
+    if (tableContainer) {
+      tableContainer.scrollTop = tableContainer.scrollHeight;
+    }
   },
 
   createDeleteButton: function (row) {
     const deleteBtn = document.createElement('button');
-    deleteBtn.className = 'btn btn-danger btn-sm';
+    deleteBtn.className =
+      'p-2 rounded-full bg-danger/10 hover:bg-danger/20 transition-colors text-danger';
     deleteBtn.innerHTML = '<i class="bi bi-trash"></i>';
+    deleteBtn.title = 'Eliminar fila';
     deleteBtn.addEventListener('click', function () {
-      row.remove();
+      row.style.transition = 'all 0.3s';
+      row.style.opacity = '0';
+      row.style.transform = 'translateX(10px)';
+
+      setTimeout(() => {
+        row.remove();
+      }, 300);
     });
     return deleteBtn;
   },
 
   displayResult: function (data) {
-    UI.elements.resultDiv.innerHTML = `<div class="alert ${
-      data.result ? 'alert-success' : 'alert-danger'
-    }">
-            Resultado: ${data.result ? 'Válida' : 'No válida'}
-        </div>`;
+    const deriveBtn = document.getElementById('generateDerivationsBtn');
 
-    UI.elements.grammarTypeDiv.innerHTML = `<h5 class="mt-3">Tipo de Gramática:</h5><div class="fs-5">${data.grammar_type}</div>`;
+    UI.elements.derivationTreeDiv.innerHTML = '<svg></svg>';
 
-    // Limpiar el árbol de derivación
-    UI.elements.derivationTreeDiv.innerHTML = '';
+    if (data.result) {
+      UI.elements.resultDiv.innerHTML = `
+        <div class="text-success font-medium flex items-center gap-2">
+          <i class="bi bi-check-circle-fill"></i> Resultado: Válida
+        </div>
+        <div class="bg-success/10 text-success rounded px-3 py-2 text-sm mt-2 flex items-center gap-2">
+          <i class="bi bi-info-circle"></i> Puede generar el árbol de derivación ahora
+        </div>
+      `;
+
+      deriveBtn.disabled = false;
+      deriveBtn.classList.add('animate-pulse');
+      setTimeout(() => deriveBtn.classList.remove('animate-pulse'), 1500);
+    } else {
+      UI.elements.resultDiv.innerHTML = `
+        <div class="text-danger font-medium flex items-center gap-2">
+          <i class="bi bi-x-circle-fill"></i> Resultado: No válida
+        </div>
+      `;
+
+      deriveBtn.disabled = true;
+    }
+
+    UI.elements.grammarTypeDiv.innerHTML = `<div class="text-gray-700 mt-2">Tipo de Gramática: <span class="font-medium">${data.grammar_type}</span></div>`;
   },
 
   displayDerivationTree: function (data) {
+    let infoContainer = document.createElement('div');
+    infoContainer.className = 'tree-info mt-3';
+
     if (typeof data === 'object') {
-      UI.elements.derivationTreeDiv.innerHTML = `<h5 class="mt-3">Árbol de Derivación:</h5><pre>${JSON.stringify(
+      infoContainer.innerHTML = `<h5>Datos del Árbol de Derivación:</h5><pre>${JSON.stringify(
         data,
         null,
         2,
       )}</pre>`;
     } else {
-      UI.elements.derivationTreeDiv.innerHTML = `<div class="alert alert-info">${data}</div>`;
+      infoContainer.innerHTML = `<div class="alert alert-info">${data}</div>`;
     }
+
+    const existingInfo =
+      UI.elements.derivationTreeDiv.querySelector('.tree-info');
+    if (existingInfo) {
+      existingInfo.remove();
+    }
+
+    UI.elements.derivationTreeDiv.appendChild(infoContainer);
   },
 
   loadProductionsToUI: function (data) {
@@ -113,7 +168,6 @@ const UI = {
         const cell3 = row.insertCell(2);
         const cell4 = row.insertCell(3);
 
-        // Variable input
         const variableInput = document.createElement('input');
         variableInput.className = 'form-control variable-input';
         variableInput.value = prod.variable || '';
@@ -122,11 +176,9 @@ const UI = {
         );
         cell1.appendChild(variableInput);
 
-        // Símbolo →
         cell2.className = 'text-center align-middle';
         cell2.textContent = '→';
 
-        // Production input
         const productionInput = document.createElement('input');
         productionInput.className = 'form-control production-input';
         productionInput.value = prod.production || '';
@@ -140,12 +192,10 @@ const UI = {
       });
     }
 
-    // Cargar símbolo inicial
     if (data.startSymbol) {
       UI.elements.startSymbol.value = data.startSymbol;
     }
 
-    // Asegurar al menos una fila vacía si no hay datos
     if (UI.elements.productionsTable.rows.length === 0) {
       UI.addProductionRow();
     }

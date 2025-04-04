@@ -1,5 +1,7 @@
 """
 Grammar analysis functions for determining grammar types and evaluating strings.
+
+Ver docs/grammar_evaluator_docs.py para documentación detallada.
 """
 
 from .grammar_parser import parse_grammar
@@ -9,13 +11,14 @@ from .grammar_utils import is_terminal, is_non_terminal
 
 def check_grammar_type(grammar):
     """
-    Determines the grammar type according to the Chomsky hierarchy.
-
+    Determina el tipo de gramática según la jerarquía de Chomsky.
+    
+    Ver docs/grammar_evaluator_docs.py (CHECK_GRAMMAR_TYPE_DOCS) para documentación detallada.
+    
     Args:
-        grammar: Grammar specification string
-
+        grammar (str): Cadena de texto con la especificación de la gramática
     Returns:
-        str: Grammar type description (Type 3, Type 2, or error message)
+        str: Descripción del tipo de gramática ("Tipo 3", "Tipo 2", etc.)
     """
     try:
         productions = parse_grammar(grammar)
@@ -41,21 +44,16 @@ def check_grammar_type(grammar):
 
 def evaluate_grammar(grammar, start_symbol, input_string):
     """
-    Evaluates a grammar and determines if it accepts a string.
-
-    This implementation handles productions of any length and includes
-    an implicit λ for the start symbol.
-
+    Evalúa una gramática y determina si acepta una cadena de entrada.
+    
+    Ver docs/grammar_evaluator_docs.py (EVALUATE_GRAMMAR_DOCS) para documentación detallada.
+    
     Args:
-        grammar: Grammar specification string
-        start_symbol: Start symbol of the grammar
-        input_string: Input string to evaluate
-
+        grammar (str): Cadena de texto con la especificación de la gramática
+        start_symbol (str): Símbolo inicial de la gramática
+        input_string (str): Cadena de entrada a evaluar
     Returns:
-        dict: Result dictionary containing:
-            - result: Boolean indicating if the grammar accepts the string
-            - grammar_type: The type of the grammar
-            - error: Error message (if any)
+        dict: Resultado de la evaluación con campos result, grammar_type y opcionalmente error
     """
     try:
         productions = parse_grammar(grammar)
@@ -67,7 +65,7 @@ def evaluate_grammar(grammar, start_symbol, input_string):
                 "error": "No valid productions found",
             }
 
-        # Check start symbol
+        # Verificar el símbolo inicial
         start_symbol_tuple = tuple(start_symbol)
         if start_symbol_tuple not in productions:
             return {
@@ -76,64 +74,88 @@ def evaluate_grammar(grammar, start_symbol, input_string):
                 "error": f"Start symbol '{start_symbol}' does not exist",
             }
 
-        # Add implicit λ to the start symbol if it doesn't exist
-        if ["λ"] not in productions[start_symbol_tuple]:
-            productions[start_symbol_tuple].append(["λ"])
+        # Si la cadena de entrada está vacía, comprobamos si el símbolo inicial puede derivar λ
+        if input_string == "":
+            # Verificar si puede derivar lambda
+            for rhs in productions[start_symbol_tuple]:
+                if rhs == ["λ"]:
+                    return {"result": True, "grammar_type": check_grammar_type(grammar)}
+            return {"result": False, "grammar_type": check_grammar_type(grammar)}
 
-        # New derive implementation using memoization
-        memo = {}
+        # Establecer un límite de derivaciones para evitar loops infinitos
+        MAX_DERIVATIONS = 1000
+        visited = set()
 
-        def derive(symbols, remaining_str):
-            """
-            Recursive function to derive a string from a grammar.
+        # Conjunto de derivaciones activas - start_symbol debe ser una lista de caracteres
+        start_symbol_list = list(
+            start_symbol
+        )  # Convertir a lista para manipulación consistente
+        current_derivations = [(start_symbol_list, input_string)]
+        derivation_count = 0
 
-            Uses dynamic programming (memoization) to avoid recalculating
-            the same sub-problems.
+        while current_derivations and derivation_count < MAX_DERIVATIONS:
+            derivation_count += 1
+            new_derivations = []
 
-            Args:
-                symbols: List of symbols to derive
-                remaining_str: Remaining string to match
+            for current_symbols, remaining_input in current_derivations:
+                # Verificar si ya hemos visitado este estado
+                state = (tuple(current_symbols), remaining_input)
+                if state in visited:
+                    continue
+                visited.add(state)
 
-            Returns:
-                bool: True if the string can be derived, False otherwise
-            """
-            key = (tuple(symbols), remaining_str)
-            if key in memo:
-                return memo[key]
+                # Caso base: cadena vacía
+                if not current_symbols and not remaining_input:
+                    return {"result": True, "grammar_type": check_grammar_type(grammar)}
 
-            # Base case: both empty
-            if not symbols and not remaining_str:
-                return True
+                # Si ya no tenemos símbolos para derivar pero aún queda entrada, esta rama falla
+                if not current_symbols and remaining_input:
+                    continue
 
-            # Lambda handling
-            if symbols and symbols[0] == "λ":
-                return derive(symbols[1:], remaining_str)
+                # Si el primer símbolo es terminal
+                if current_symbols and is_terminal(current_symbols[0]):
+                    if remaining_input.startswith(current_symbols[0]):
+                        new_derivations.append(
+                            (
+                                current_symbols[1:],
+                                remaining_input[len(current_symbols[0]) :],
+                            )
+                        )
+                    continue
 
-            # Terminal case
-            if symbols and is_terminal(symbols[0]):
-                if remaining_str.startswith(symbols[0]):
-                    return derive(symbols[1:], remaining_str[len(symbols[0]) :])
-                return False
+                # Si el primer símbolo es lambda (ε)
+                if current_symbols and current_symbols[0] == "λ":
+                    new_derivations.append((current_symbols[1:], remaining_input))
+                    continue
 
-            # Non-terminal case
-            if symbols and is_non_terminal(symbols[0]):
-                nt = tuple([symbols[0]])
-                if nt not in productions:
-                    return False
+                # Si el primer símbolo es no terminal
+                if current_symbols and is_non_terminal(current_symbols[0]):
+                    symbol_tuple = tuple([current_symbols[0]])
+                    if symbol_tuple in productions:
+                        for production in productions[symbol_tuple]:
+                            # Si es lambda, simplemente lo omitimos
+                            if production == ["λ"]:
+                                new_derivations.append(
+                                    (current_symbols[1:], remaining_input)
+                                )
+                            else:
+                                # Asegurarnos de que estamos concatenando listas con listas
+                                # production ya es una lista, current_symbols[1:] también es una lista
+                                new_symbols = production + current_symbols[1:]
+                                new_derivations.append((new_symbols, remaining_input))
 
-                for production in productions[nt]:
-                    # Try all possible string splits
-                    for split_pos in range(len(remaining_str) + 1):
-                        if derive(production + symbols[1:], remaining_str[:split_pos]):
-                            if derive([], remaining_str[split_pos:]):
-                                memo[key] = True
-                                return True
+            # Actualizar derivaciones actuales
+            current_derivations = new_derivations
 
-            memo[key] = False
-            return False
-
-        result = derive([start_symbol], input_string)
-        return {"result": result, "grammar_type": check_grammar_type(grammar)}
+        # Si llegamos aquí, no encontramos una derivación dentro del límite
+        return {"result": False, "grammar_type": check_grammar_type(grammar)}
 
     except Exception as e:
-        return {"result": False, "grammar_type": "Error", "error": f"Error: {str(e)}"}
+        import traceback
+
+        trace = traceback.format_exc()
+        return {
+            "result": False,
+            "grammar_type": "Error",
+            "error": f"Error: {str(e)}\n{trace}",
+        }

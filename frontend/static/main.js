@@ -1,12 +1,12 @@
 document.addEventListener('DOMContentLoaded', function () {
   UI.init();
 
-  document.getElementById('addProductionBtn').addEventListener('click', UI.addProductionRow);
+  document.getElementById('addProductionBtn').addEventListener('click', UI.addNewRow);
   document.getElementById('generateGrammarBtn').addEventListener('click', Grammar.generateGrammar);
   document.getElementById('evaluateGrammarBtn').addEventListener('click', API.evaluateGrammar);
   document
     .getElementById('generateDerivationsBtn')
-    .addEventListener('click', API.generateDerivationTree);
+    .addEventListener('click', drawTree.generateTree);
   document
     .getElementById('loadProductionBtn')
     .addEventListener('click', FileOperations.triggerFileInput);

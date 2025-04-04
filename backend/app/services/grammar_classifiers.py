@@ -1,6 +1,7 @@
 """
-Functions for classifying grammar productions and determining grammar types
-according to the Chomsky hierarchy.
+Funciones para clasificar producciones gramaticales según la jerarquía de Chomsky.
+
+Ver docs/grammar_classifiers_docs.py para documentación detallada.
 """
 
 from .grammar_utils import is_terminal, is_non_terminal, is_lambda
@@ -8,13 +9,14 @@ from .grammar_utils import is_terminal, is_non_terminal, is_lambda
 
 def is_right_linear_production(rhs):
     """
-    Checks if a production is right-linear (A → aB or A → a).
-
+    Verifica si una producción es lineal a la derecha (A → aB o A → a).
+    
+    Ver docs/grammar_classifiers_docs.py (IS_RIGHT_LINEAR_PRODUCTION_DOCS) para documentación detallada.
+    
     Args:
-        rhs: The right-hand side of the production (list of symbols)
-
+        rhs (list): El lado derecho de la producción como lista de símbolos
     Returns:
-        bool: True if the production is right-linear, False otherwise
+        bool: True si la producción es lineal a la derecha, False en caso contrario
     """
     if len(rhs) == 1:
         return is_terminal(rhs[0])
@@ -25,13 +27,14 @@ def is_right_linear_production(rhs):
 
 def is_left_linear_production(rhs):
     """
-    Checks if a production is left-linear (A → Ba or A → a).
-
+    Verifica si una producción es lineal a la izquierda (A → Ba o A → a).
+    
+    Ver docs/grammar_classifiers_docs.py (IS_LEFT_LINEAR_PRODUCTION_DOCS) para documentación detallada.
+    
     Args:
-        rhs: The right-hand side of the production (list of symbols)
-
+        rhs (list): El lado derecho de la producción como lista de símbolos
     Returns:
-        bool: True if the production is left-linear, False otherwise
+        bool: True si la producción es lineal a la izquierda, False en caso contrario
     """
     if len(rhs) == 1:
         return is_terminal(rhs[0])
@@ -42,23 +45,14 @@ def is_left_linear_production(rhs):
 
 def is_type_3_grammar(productions):
     """
-    Validates if a grammar is Type 3 (Regular).
-
-    A grammar is regular if all productions are of the form:
-    - A → a (where a is a terminal)
-    - A → aB (right-linear, where a is a terminal and B is a non-terminal)
-    - A → Ba (left-linear, where B is a non-terminal and a is a terminal)
-    - A → λ (lambda production)
-
-    The grammar must be consistently right-linear or left-linear.
-
+    Valida si una gramática es de Tipo 3 (Gramática Regular) según la jerarquía de Chomsky.
+    
+    Ver docs/grammar_classifiers_docs.py (IS_TYPE_3_GRAMMAR_DOCS) para documentación detallada.
+    
     Args:
-        productions: Dictionary mapping LHS tuples to lists of RHS lists
-
+        productions (dict): Diccionario que mapea tuplas LHS a listas de listas RHS
     Returns:
-        tuple: (is_type_3, linear_type) where:
-            - is_type_3 is a boolean indicating if the grammar is Type 3
-            - linear_type is 'right', 'left', or None
+        tuple: (is_type_3, linear_type) donde is_type_3 es un booleano y linear_type es 'right', 'left' o None
     """
     if not productions:
         return False, None
@@ -104,15 +98,14 @@ def is_type_3_grammar(productions):
 
 def is_type_2_grammar(productions):
     """
-    Validates if a grammar is Type 2 (Context-Free).
-
-    A grammar is context-free if each left-hand side is a single non-terminal.
-
+    Valida si una gramática es de Tipo 2 (Gramática Libre de Contexto) según la jerarquía de Chomsky.
+    
+    Ver docs/grammar_classifiers_docs.py (IS_TYPE_2_GRAMMAR_DOCS) para documentación detallada.
+    
     Args:
-        productions: Dictionary mapping LHS tuples to lists of RHS lists
-
+        productions (dict): Diccionario que mapea tuplas LHS a listas de listas RHS
     Returns:
-        bool: True if the grammar is Type 2, False otherwise
+        bool: True si la gramática es de Tipo 2, False en caso contrario
     """
     if not productions:
         return False
