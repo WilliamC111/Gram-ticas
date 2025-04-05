@@ -6,6 +6,18 @@ const API = {
     const startSymbol = document.getElementById('start_symbol').value.trim();
     const inputString = document.getElementById('input_string').value.trim();
 
+    // Validar que se haya ingresado una cadena
+    if (!inputString) {
+      document.getElementById('result').innerHTML = `
+        <div class="text-danger font-medium flex items-center gap-2">
+          <i class="bi bi-exclamation-triangle-fill"></i> Error: Debe ingresar una cadena para evaluar
+        </div>
+      `;
+      document.getElementById('grammarType').innerHTML = '';
+      document.getElementById('derivationTree').innerHTML = '<svg></svg>';
+      return; // Salir de la función si no hay cadena
+    }
+
     fetch('/evaluate', {
       method: 'POST',
       headers: {
@@ -33,6 +45,16 @@ const API = {
     const grammar = document.getElementById('generatedGrammar').textContent.trim();
     const startSymbol = document.getElementById('start_symbol').value.trim();
     const inputString = document.getElementById('input_string').value.trim();
+
+
+    if (!inputString) {
+      document.getElementById('derivationTree').innerHTML = `
+        <div class="text-danger font-medium flex items-center gap-2">
+          <i class="bi bi-exclamation-triangle-fill"></i> Error: Debe ingresar una cadena para generar el árbol de derivación
+        </div>
+      `;
+      return; 
+    }
 
     fetch('/generate-derivation-tree', {
       method: 'POST',

@@ -17,7 +17,7 @@ const drawTree = {
         .attr('text-anchor', 'middle')
         .attr('dominant-baseline', 'middle')
         .attr('class', 'error-message')
-        .text('No se pudo generar el árbol de derivación para esta cadena');
+        .text('Cadena inexistente');
 
       return;
     }
