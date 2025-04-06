@@ -36,23 +36,24 @@ const UI = {
     const tableBody = document.querySelector('#productionsTable tbody');
     const newRow = tableBody.insertRow();
 
-    newRow.className = 'hover:bg-gray-50 transition-colors';
+    newRow.className = 'hover:bg-dark-700/80 transition-colors';
 
     const cell1 = newRow.insertCell(0);
     const cell2 = newRow.insertCell(1);
     const cell3 = newRow.insertCell(2);
     const cell4 = newRow.insertCell(3);
 
-    cell1.className = 'p-3 border-b border-gray-100';
-    cell2.className = 'p-3 text-center align-middle border-b border-gray-100';
-    cell3.className = 'p-3 border-b border-gray-100';
-    cell4.className = 'p-3 text-center border-b border-gray-100';
+    cell1.className = 'p-3 border-b border-dark-600';
+    cell2.className = 'p-3 text-center align-middle border-b border-dark-600';
+    cell3.className = 'p-3 border-b border-dark-600';
+    cell4.className = 'p-3 text-center border-b border-dark-600';
 
     const variableInput = document.createElement('input');
     variableInput.type = 'text';
     variableInput.className =
-      'w-full bg-white border border-gray-200 rounded-md px-3 py-2 text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-colors variable-input';
+      'w-full bg-dark-700 border border-dark-600 rounded-md px-3 py-2 text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-colors variable-input';
     variableInput.placeholder = 'Ejemplo: S';
+    variableInput.setAttribute('aria-label', 'Variable');
     variableInput.addEventListener('input', () =>
       Validation.validateVariableInput(variableInput),
     );
@@ -66,8 +67,9 @@ const UI = {
     const productionInput = document.createElement('input');
     productionInput.type = 'text';
     productionInput.className =
-      'w-full bg-white border border-gray-200 rounded-md px-3 py-2 text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-colors production-input';
+      'w-full bg-dark-700 border border-dark-600 rounded-md px-3 py-2 text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-colors production-input';
     productionInput.placeholder = 'Ejemplo: aB | b | λ';
+    productionInput.setAttribute('aria-label', 'Producción');
     productionInput.addEventListener('input', () =>
       Validation.validateProductionInput(productionInput),
     );
@@ -86,9 +88,10 @@ const UI = {
   createDeleteButton: function (row) {
     const deleteBtn = document.createElement('button');
     deleteBtn.className =
-      'p-2 rounded-full bg-danger/10 hover:bg-danger/20 transition-colors text-danger';
+      'p-2 rounded-full bg-danger/10 hover:bg-danger/20 transition-colors text-danger hover:shadow-glow-danger';
     deleteBtn.innerHTML = '<i class="bi bi-trash"></i>';
     deleteBtn.title = 'Eliminar fila';
+    deleteBtn.setAttribute('aria-label', 'Eliminar fila');
     deleteBtn.addEventListener('click', function () {
       row.style.transition = 'all 0.3s';
       row.style.opacity = '0';
@@ -104,15 +107,18 @@ const UI = {
   displayResult: function (data) {
     const deriveBtn = document.getElementById('generateDerivationsBtn');
 
-    UI.elements.derivationTreeDiv.innerHTML = '<svg></svg>';
+    // Reset del árbol de derivación
+    UI.elements.derivationTreeDiv.innerHTML = '<svg width="100%" height="500"></svg>';
 
     if (data.result) {
       UI.elements.resultDiv.innerHTML = `
-        <div class="text-success font-medium flex items-center gap-2">
-          <i class="bi bi-check-circle-fill"></i> Resultado: Válida
-        </div>
-        <div class="bg-success/10 text-success rounded px-3 py-2 text-sm mt-2 flex items-center gap-2">
-          <i class="bi bi-info-circle"></i> Puede generar el árbol de derivación ahora
+        <div class="flex flex-col gap-2">
+          <div class="text-success font-medium">
+            <i class="bi bi-check-circle-fill mr-2"></i>Resultado: Válida
+          </div>
+          <div class="text-green-500 text-sm italic">
+            <i class="bi bi-arrow-right-circle mr-2"></i>Puede generar el árbol de derivación ahora
+          </div>
         </div>
       `;
 
@@ -121,17 +127,21 @@ const UI = {
       setTimeout(() => deriveBtn.classList.remove('animate-pulse'), 1500);
     } else {
       UI.elements.resultDiv.innerHTML = `
-        <div class="text-danger font-medium flex items-center gap-2">
-          <i class="bi bi-x-circle-fill"></i> Resultado: No válida
+        <div class="text-danger font-medium">
+          <i class="bi bi-x-circle-fill mr-2"></i>Resultado: No válida
         </div>
       `;
-
       deriveBtn.disabled = true;
     }
 
-    UI.elements.grammarTypeDiv.innerHTML = `<div class="text-gray-700 mt-2">Tipo de Gramática: <span class="font-medium">${data.grammar_type}</span></div>`;
-  },
-
+    // Mostrar el tipo de gramática en el div correspondiente
+    UI.elements.grammarTypeDiv.innerHTML = `
+      <div class="text-gray-300 mt-3">
+        <span class="font-medium">Tipo de Gramática:</span> 
+        <span class="text-primary">${data.grammar_type}</span>
+      </div>
+    `;
+},
   displayDerivationTree: function (data) {
     let infoContainer = document.createElement('div');
     infoContainer.className = 'tree-info mt-3';
@@ -163,31 +173,48 @@ const UI = {
         if (!prod || typeof prod !== 'object') return;
 
         const row = UI.elements.productionsTable.insertRow();
+        row.className = 'hover:bg-dark-700/80 transition-colors';
+
         const cell1 = row.insertCell(0);
         const cell2 = row.insertCell(1);
         const cell3 = row.insertCell(2);
         const cell4 = row.insertCell(3);
 
+        cell1.className = 'p-3 border-b border-dark-600';
+        cell2.className =
+          'p-3 text-center align-middle border-b border-dark-600';
+        cell3.className = 'p-3 border-b border-dark-600';
+        cell4.className = 'p-3 text-center border-b border-dark-600';
+
         const variableInput = document.createElement('input');
-        variableInput.className = 'form-control variable-input';
+        variableInput.type = 'text';
+        variableInput.className =
+          'w-full bg-dark-700 border border-dark-600 rounded-md px-3 py-2 text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-colors variable-input';
+        variableInput.placeholder = 'Ejemplo: S';
         variableInput.value = prod.variable || '';
+        variableInput.setAttribute('aria-label', 'Variable');
         variableInput.addEventListener('input', () =>
           Validation.validateVariableInput(variableInput),
         );
         cell1.appendChild(variableInput);
 
-        cell2.className = 'text-center align-middle';
-        cell2.textContent = '→';
+        const arrowSpan = document.createElement('span');
+        arrowSpan.className = 'text-primary font-bold text-lg';
+        arrowSpan.textContent = '→';
+        cell2.appendChild(arrowSpan);
 
         const productionInput = document.createElement('input');
-        productionInput.className = 'form-control production-input';
+        productionInput.type = 'text';
+        productionInput.className =
+          'w-full bg-dark-700 border border-dark-600 rounded-md px-3 py-2 text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-colors production-input';
+        productionInput.placeholder = 'Ejemplo: aB | b | λ';
         productionInput.value = prod.production || '';
+        productionInput.setAttribute('aria-label', 'Producción');
         productionInput.addEventListener('input', () =>
           Validation.validateProductionInput(productionInput),
         );
         cell3.appendChild(productionInput);
 
-        cell4.className = 'text-center align-middle';
         cell4.appendChild(UI.createDeleteButton(row));
       });
     }
