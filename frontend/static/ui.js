@@ -107,19 +107,18 @@ const UI = {
   displayResult: function (data) {
     const deriveBtn = document.getElementById('generateDerivationsBtn');
 
-    // Reset the tree visualization area to a simple structure that works with the original code
-    UI.elements.derivationTreeDiv.innerHTML =
-      '<svg width="100%" height="500"></svg>';
+    // Reset del árbol de derivación
+    UI.elements.derivationTreeDiv.innerHTML = '<svg width="100%" height="500"></svg>';
 
     if (data.result) {
       UI.elements.resultDiv.innerHTML = `
-        <div class="text-success font-medium flex items-center gap-2">
-          <i class="bi bi-check-circle-fill"></i> Resultado: Válida
-        </div>
-        <div></div>
-        <div class="bg-success/10 text-success rounded px-3 py-2 text-sm mt-2 flex items-center gap-2">
-          <i class="bi bi-info-circle"></i>
-          Puede generar el árbol de derivación ahora
+        <div class="flex flex-col gap-2">
+          <div class="text-success font-medium">
+            <i class="bi bi-check-circle-fill mr-2"></i>Resultado: Válida
+          </div>
+          <div class="text-green-500 text-sm italic">
+            <i class="bi bi-arrow-right-circle mr-2"></i>Puede generar el árbol de derivación ahora
+          </div>
         </div>
       `;
 
@@ -128,17 +127,21 @@ const UI = {
       setTimeout(() => deriveBtn.classList.remove('animate-pulse'), 1500);
     } else {
       UI.elements.resultDiv.innerHTML = `
-        <div class="text-danger font-medium flex items-center gap-2">
-          <i class="bi bi-x-circle-fill"></i> Resultado: No válida
+        <div class="text-danger font-medium">
+          <i class="bi bi-x-circle-fill mr-2"></i>Resultado: No válida
         </div>
       `;
-
       deriveBtn.disabled = true;
     }
 
-    UI.elements.grammarTypeDiv.innerHTML = `<div class="text-gray-300 mt-2">Tipo de Gramática: <span class="font-medium">${data.grammar_type}</span></div>`;
-  },
-
+    // Mostrar el tipo de gramática en el div correspondiente
+    UI.elements.grammarTypeDiv.innerHTML = `
+      <div class="text-gray-300 mt-3">
+        <span class="font-medium">Tipo de Gramática:</span> 
+        <span class="text-primary">${data.grammar_type}</span>
+      </div>
+    `;
+},
   displayDerivationTree: function (data) {
     let infoContainer = document.createElement('div');
     infoContainer.className = 'tree-info mt-3';
