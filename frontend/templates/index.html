@@ -259,7 +259,7 @@
                   aria-required="true"
                   pattern="[a-z]*"
                   oninput="this.value = this.value.toLowerCase();"
-                  onkeydown="return /[a-z]|Backspace|Delete|ArrowLeft|ArrowRight|Tab/i.test(event.key)"
+                  onkeydown="return /[a-z0-9]|Backspace|Delete|ArrowLeft|ArrowRight|Tab/i.test(event.key)"
                   title="Solo se permiten letras minúsculas y símbolos terminales"
                 />
               </div>
