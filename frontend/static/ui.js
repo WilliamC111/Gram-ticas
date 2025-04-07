@@ -227,4 +227,45 @@ const UI = {
       UI.addProductionRow();
     }
   },
+
+  displayGeneratedStrings: function (data) {
+    const container = document.getElementById('generatedStrings');
+    
+    if (data.error) {
+      container.innerHTML = `
+        <div class="text-warning font-medium flex items-center gap-2">
+          <i class="bi bi-exclamation-triangle-fill"></i> ${data.error}
+        </div>
+      `;
+      return;
+    }
+    
+    if (data.result.length === 0) {
+      container.innerHTML = `
+        <div class="text-gray-400 italic">
+          No se generaron cadenas o la gramática no produce cadenas terminales.
+        </div>
+      `;
+      return;
+    }
+    
+    let html = `
+      <div class="mb-2 text-gray-300">
+        <span class="font-medium">Cadenas generadas:</span> 
+        <span class="text-sm text-gray-400">(Mostrando ${Math.min(data.result.length, 20)} de ${data.result.length})</span>
+      </div>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+    `;
+    
+    data.result.slice(0, 20).forEach(str => {
+      html += `
+        <div class="bg-dark-700/50 border border-dark-600 rounded px-2 py-1 text-center text-sm font-mono">
+          ${str || 'λ'}
+        </div>
+      `;
+    });
+    
+    html += `</div>`;
+    container.innerHTML = html;
+  },
 };

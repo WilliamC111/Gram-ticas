@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, request, jsonify
-from app.services.grammar_evaluator import evaluate_grammar
+from app.services.grammar_evaluator import evaluate_grammar, generate_strings
 
 main_bp = Blueprint("main", __name__)
 
@@ -16,5 +16,16 @@ def evaluate():
         return jsonify({"error": "Invalid input"}), 400
     result = evaluate_grammar(
         data["grammar"], data["start_symbol"], data["input_string"]
+    )
+    return jsonify(result)
+
+
+@main_bp.route("/generate_strings", methods=["POST"])
+def generate_strings_endpoint():
+    data = request.json
+    if data is None:
+        return jsonify({"error": "Invalid input"}), 400
+    result = generate_strings(
+        data["grammar"], data["start_symbol"]
     )
     return jsonify(result)

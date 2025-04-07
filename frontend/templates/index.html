@@ -382,33 +382,40 @@
         </div>
       </div>
 
-      <!-- Árbol de derivación -->
-      <div
-        class="bg-dark-800 rounded-lg shadow-glow overflow-hidden border border-dark-600 transition-all hover:shadow-glow-primary duration-300 mt-2"
-      >
-        <div
-          class="p-3 border-b border-dark-700 bg-gradient-to-r from-dark-700 to-dark-600"
-        >
-          <h5 class="text-lg font-medium text-gray-200 flex items-center gap-2">
-            <i class="bi bi-diagram-3 text-cyber-teal"></i> Árbol de Derivación
-          </h5>
-        </div>
-        <div class="p-4 bg-dark-900/30">
-          <div
-            id="derivationTree"
-            class="text-center bg-dark-800 rounded-md border border-dark-600 p-4 min-h-[500px] flex items-center justify-center"
-            aria-label="Visualización del árbol de derivación"
-          >
-            <svg width="100%" height="500" class="tree-svg"></svg>
-            <div class="tree-placeholder text-gray-400 italic">
-              <i class="bi bi-diagram-3 text-4xl block mb-3 opacity-20"></i>
-              El árbol de derivación aparecerá aquí cuando genere las
-              derivaciones
-            </div>
-          </div>
-        </div>
+<!-- Árbol de derivación -->
+<div class="bg-dark-800 rounded-lg shadow-glow overflow-hidden border border-dark-600 transition-all hover:shadow-glow-primary duration-300 mt-2">
+  <div class="p-3 border-b border-dark-700 bg-gradient-to-r from-dark-700 to-dark-600">
+    <h5 class="text-lg font-medium text-gray-200 flex items-center gap-2">
+      <i class="bi bi-diagram-3 text-cyber-teal"></i> Árbol de Derivación
+    </h5>
+  </div>
+  <div class="p-4 bg-dark-900/30">
+    <div id="derivationTree" class="relative text-center bg-dark-800 rounded-md border border-dark-600 p-4 min-h-[500px]" aria-label="Visualización del árbol de derivación">
+      <svg width="100%" height="500" class="tree-svg"></svg>
+      <div class="tree-placeholder absolute inset-0 flex flex-col items-center justify-center text-gray-400 italic">
+        <i class="bi bi-diagram-3 text-4xl mb-3 opacity-20"></i>
+        <p>El árbol de derivación aparecerá aquí cuando genere las derivaciones</p>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- Nueva sección: Cadenas generadas -->
+<div class="bg-dark-800 rounded-lg shadow-glow overflow-hidden border border-dark-600 transition-all hover:shadow-glow-primary duration-300 mt-2">
+  <div class="p-3 border-b border-dark-700 bg-gradient-to-r from-dark-700 to-dark-600">
+    <h5 class="text-lg font-medium text-gray-200 flex items-center gap-2">
+      <i class="bi bi-list-ul text-cyber-teal"></i> Cadenas Generadas por la Gramática
+    </h5>
+  </div>
+  <div class="p-5">
+    <div id="generatedStrings" class="min-h-[100px]">
+      <div class="text-gray-400 italic">
+        <i class="bi bi-info-circle mr-2"></i> Las cadenas generadas por la gramática aparecerán aquí después de la evaluación
+      </div>
+    </div>
+  </div>
+</div>
+</div>
 
     <script src="{{ url_for('static', filename='api.js') }}" defer></script>
     <script
