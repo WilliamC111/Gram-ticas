@@ -7,17 +7,19 @@ from .grammar_utils import is_terminal, is_non_terminal
 from collections import deque
 
 def check_grammar_type(grammar):
-    """Determina el tipo de gramática según la jerarquía de Chomsky."""
+    """Determina el tipo de gramática con prioridad correcta"""
     try:
         productions = parse_grammar(grammar)
 
         if not productions:
             return "Empty grammar or incorrect format"
 
-        is_type_3, _ = is_type_3_grammar(productions)
-        if is_type_3:
-            return "Tipo 3"
+        # Primero verificar si es tipo 3
+        is_type3, linear_type = is_type_3_grammar(productions)
+        if is_type3:
+            return f"Tipo 3 ({'lineal derecha' if linear_type == 'right' else 'lineal izquierda'})"
 
+        # Luego verificar tipo 2
         if is_type_2_grammar(productions):
             return "Tipo 2"
 
@@ -26,52 +28,47 @@ def check_grammar_type(grammar):
         return f"Error analyzing grammar: {str(e)}"
 
 def generate_strings(grammar, start_symbol, max_strings=20, max_length=None):
-    """Genera cadenas válidas de la gramática (hasta max_strings) con longitud máxima opcional."""
+    """Genera cadenas válidas para gramáticas Tipo 2"""
     try:
         productions = parse_grammar(grammar)
         strings = set()
         
         if not productions:
-            return {"result": [], "error": "Empty grammar or incorrect format"}
+            return {"result": [], "error": "Gramática vacía o formato incorrecto"}
             
-        # Verificar tipo de gramática
-        grammar_type = check_grammar_type(grammar)
-        if "No es tipo 2 ni tipo 3" in grammar_type:
-            return {"result": [], "error": "Solo se pueden generar cadenas para gramáticas tipo 2 o 3"}
-            
-        # Usamos BFS para generar cadenas
+        # Usar BFS con manejo especial para λ
         queue = deque()
         queue.append(([start_symbol], 0))  # (símbolos, pasos)
         
         while queue and len(strings) < max_strings:
-            current_symbols, steps = queue.popleft()
+            current, steps = queue.popleft()
             
-            # Si ya tenemos solo terminales, agregamos la cadena si cumple con la longitud
-            if all(is_terminal(sym) for sym in current_symbols):
-                generated_str = ''.join(current_symbols).replace("λ", "")
-                if generated_str:  # Ignorar cadena vacía a menos que sea explícita
-                    if max_length is None or len(generated_str) <= max_length:
-                        strings.add(generated_str)
+            # Generar cadena terminal
+            if all(is_terminal(sym) or sym == "λ" for sym in current):
+                generated = ''.join(sym for sym in current if sym != "λ")
+                if (max_length is None or len(generated) <= max_length) and generated not in strings:
+                    strings.add(generated)
                 continue
                 
-            # Limitar la profundidad para evitar bucles infinitos
-            if steps > 20:
+            # Limitar recursión
+            if steps > 100:  
                 continue
                 
-            # Encontrar el primer no terminal
-            for i, symbol in enumerate(current_symbols):
-                if is_non_terminal(symbol):
-                    # Reemplazar con todas las producciones posibles
-                    symbol_tuple = tuple([symbol])
-                    if symbol_tuple in productions:
-                        for production in productions[symbol_tuple]:
-                            new_symbols = current_symbols[:i] + list(production) + current_symbols[i+1:]
-                            # Si max_length está definido, no seguimos derivaciones que excedan el límite
-                            if max_length is None or len(''.join([s for s in new_symbols if is_terminal(s)])) <= max_length:
-                                queue.append((new_symbols, steps + 1))
+            # Expandir el primer no terminal
+            for i, sym in enumerate(current):
+                if is_non_terminal(sym):
+                    for prod in productions.get((sym,), []):
+                        new_current = current[:i] + list(prod) + current[i+1:]
+                        # Controlar longitud máxima
+                        terminal_count = sum(1 for s in new_current if is_terminal(s))
+                        if max_length is None or terminal_count <= max_length:
+                            queue.append((new_current, steps + 1))
                     break
                     
-        return {"result": sorted(strings, key=lambda x: (len(x), x)), "grammar_type": grammar_type}
+        return {
+            "result": sorted(strings, key=lambda x: (len(x), x)),
+            "grammar_type": check_grammar_type(grammar)
+        }
     except Exception as e:
         return {"result": [], "error": str(e)}
     

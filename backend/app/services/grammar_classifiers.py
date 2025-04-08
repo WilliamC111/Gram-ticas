@@ -44,79 +44,66 @@ def is_left_linear_production(rhs):
 
 
 def is_type_3_grammar(productions):
-    """
-    Valida si una gramática es de Tipo 3 (Gramática Regular) según la jerarquía de Chomsky.
-
-    Ver docs/grammar_classifiers_docs.py (IS_TYPE_3_GRAMMAR_DOCS) para documentación detallada.
-
-    Args:
-        productions (dict): Diccionario que mapea tuplas LHS a listas de listas RHS
-    Returns:
-        tuple: (is_type_3, linear_type) donde is_type_3 es un booleano y linear_type es 'right', 'left' o None
-    """
+    """Verifica si es gramática Tipo 3 (Regular) con chequeo estricto"""
     if not productions:
         return False, None
 
-    # Check that each LHS is a single non-terminal
-    for lhs in productions.keys():
+    has_right = False
+    has_left = False
+    has_lambda = False
+
+    for lhs, rhs_list in productions.items():
         if len(lhs) != 1 or not is_non_terminal(lhs[0]):
             return False, None
 
-    # Determinar si tiene producciones lambda (palabra vacía)
-    # Para una gramática tipo 3, no debemos permitir producciones λ
-    for lhs, rhs_list in productions.items():
         for rhs in rhs_list:
             if rhs == ["λ"]:
-                # Si hay alguna producción lambda, no es tipo 3
-                return False, None
+                if lhs[0] != "S":
+                    return False, None
+                has_lambda = True
+                continue
 
-    # Determine if it's right-linear or left-linear
-    linear_type = None  # 'right', 'left' or None
-
-    for lhs, rhs_list in productions.items():
-        for rhs in rhs_list:
-            # Check regular productions
             if len(rhs) == 1:
-                # A → a (a terminal)
                 if not is_terminal(rhs[0]):
                     return False, None
             elif len(rhs) == 2:
-                # A → aB (right-linear)
                 if is_terminal(rhs[0]) and is_non_terminal(rhs[1]):
-                    if linear_type == "left":
-                        return False, None
-                    linear_type = "right"
-                # A → Ba (left-linear)
+                    has_right = True
                 elif is_non_terminal(rhs[0]) and is_terminal(rhs[1]):
-                    if linear_type == "right":
-                        return False, None
-                    linear_type = "left"
+                    has_left = True
                 else:
                     return False, None
             else:
-                # More than 2 symbols is not regular
                 return False, None
 
-    return True, linear_type if linear_type else "right"
+    # Gramática que puede generar lenguajes no regales no es Tipo 3
+    if has_lambda and (has_right or has_left):
+        return False, None  # Esto fuerza que sea clasificada como Tipo 2
+
+    if has_right and has_left:
+        return False, None
+
+    return (True, "right" if has_right else "left") if (has_right or has_left) else (False, None)
 
 
 def is_type_2_grammar(productions):
-    """
-    Valida si una gramática es de Tipo 2 (Gramática Libre de Contexto) según la jerarquía de Chomsky.
-
-    Ver docs/grammar_classifiers_docs.py (IS_TYPE_2_GRAMMAR_DOCS) para documentación detallada.
-
-    Args:
-        productions (dict): Diccionario que mapea tuplas LHS a listas de listas RHS
-    Returns:
-        bool: True si la gramática es de Tipo 2, False en caso contrario
-    """
+    """Verifica si es gramática Tipo 2 (Libre de Contexto)"""
     if not productions:
         return False
 
-    # In Type 2 grammars, each left-hand side must be a single non-terminal
+    # Primero verificar que es Tipo 2 básico
     for lhs in productions.keys():
         if len(lhs) != 1 or not is_non_terminal(lhs[0]):
             return False
 
-    return True
+    # Solo S → λ permitido
+    for lhs, rhs_list in productions.items():
+        for rhs in rhs_list:
+            if rhs == ["λ"] and lhs[0] != "S":
+                return False
+
+    # Ahora, clave: si NO es tipo 3, entonces es tipo 2
+    is_type3, _ = is_type_3_grammar(productions)
+    return not is_type3
+
+
