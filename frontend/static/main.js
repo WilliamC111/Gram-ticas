@@ -16,5 +16,5 @@ document.addEventListener('DOMContentLoaded', function () {
   document
     .getElementById('productionFileInput')
     .addEventListener('change', FileOperations.handleFileUpload);
-  
+    document.getElementById('generateStringsBtn').addEventListener('click', API.generateStrings);
 });

@@ -25,7 +25,11 @@ def generate_strings_endpoint():
     data = request.json
     if data is None:
         return jsonify({"error": "Invalid input"}), 400
+    max_length = data.get("max_length", None)  # Nuevo parámetro opcional
     result = generate_strings(
-        data["grammar"], data["start_symbol"]
+        data["grammar"], 
+        data["start_symbol"],
+        max_strings=20,
+        max_length=max_length  # Pasamos el parámetro
     )
     return jsonify(result)

@@ -1,4 +1,3 @@
-// api.js
 const API = {
   evaluateGrammar: function () {
     Grammar.generateGrammar();
@@ -35,8 +34,7 @@ const API = {
       .then((response) => response.json())
       .then((data) => {
         UI.displayResult(data);
-        // Llamar a la función para generar cadenas automáticamente después de evaluar
-        API.generateStrings();
+        // Removemos la llamada automática a generateStrings
       })
       .catch((error) => {
         console.error('Error:', error);
@@ -51,6 +49,24 @@ const API = {
       .getElementById('generatedGrammar')
       .textContent.trim();
     const startSymbol = document.getElementById('start_symbol').value.trim();
+    const maxLength = document.getElementById('max_length').value;
+
+    // Validar que la gramática existe
+    if (!grammar) {
+      document.getElementById('generatedStrings').innerHTML = `
+        <div class="text-warning font-medium flex items-center gap-2">
+          <i class="bi bi-exclamation-triangle-fill"></i> Primero genere una gramática válida
+        </div>
+      `;
+      return;
+    }
+
+    // Mostrar estado de carga
+    document.getElementById('generatedStrings').innerHTML = `
+      <div class="flex items-center justify-center gap-2 text-gray-400">
+        <i class="bi bi-arrow-repeat animate-spin"></i> Generando cadenas...
+      </div>
+    `;
 
     fetch('/generate_strings', {
       method: 'POST',
@@ -60,6 +76,7 @@ const API = {
       body: JSON.stringify({
         grammar: grammar,
         start_symbol: startSymbol,
+        max_length: maxLength ? parseInt(maxLength) : null
       }),
     })
       .then((response) => response.json())
@@ -70,7 +87,7 @@ const API = {
         console.error('Error:', error);
         document.getElementById('generatedStrings').innerHTML = `
           <div class="text-danger font-medium flex items-center gap-2">
-            <i class="bi bi-exclamation-triangle-fill"></i> Error al generar cadenas
+            <i class="bi bi-exclamation-triangle-fill"></i> Error al generar cadenas: ${error.message}
           </div>
         `;
       });

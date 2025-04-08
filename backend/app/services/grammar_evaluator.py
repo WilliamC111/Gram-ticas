@@ -25,8 +25,8 @@ def check_grammar_type(grammar):
     except Exception as e:
         return f"Error analyzing grammar: {str(e)}"
 
-def generate_strings(grammar, start_symbol, max_strings=20):
-    """Genera cadenas válidas de la gramática (hasta max_strings)."""
+def generate_strings(grammar, start_symbol, max_strings=20, max_length=None):
+    """Genera cadenas válidas de la gramática (hasta max_strings) con longitud máxima opcional."""
     try:
         productions = parse_grammar(grammar)
         strings = set()
@@ -46,11 +46,12 @@ def generate_strings(grammar, start_symbol, max_strings=20):
         while queue and len(strings) < max_strings:
             current_symbols, steps = queue.popleft()
             
-            # Si ya tenemos solo terminales, agregamos la cadena
+            # Si ya tenemos solo terminales, agregamos la cadena si cumple con la longitud
             if all(is_terminal(sym) for sym in current_symbols):
                 generated_str = ''.join(current_symbols).replace("λ", "")
                 if generated_str:  # Ignorar cadena vacía a menos que sea explícita
-                    strings.add(generated_str)
+                    if max_length is None or len(generated_str) <= max_length:
+                        strings.add(generated_str)
                 continue
                 
             # Limitar la profundidad para evitar bucles infinitos
@@ -65,13 +66,15 @@ def generate_strings(grammar, start_symbol, max_strings=20):
                     if symbol_tuple in productions:
                         for production in productions[symbol_tuple]:
                             new_symbols = current_symbols[:i] + list(production) + current_symbols[i+1:]
-                            queue.append((new_symbols, steps + 1))
+                            # Si max_length está definido, no seguimos derivaciones que excedan el límite
+                            if max_length is None or len(''.join([s for s in new_symbols if is_terminal(s)])) <= max_length:
+                                queue.append((new_symbols, steps + 1))
                     break
                     
         return {"result": sorted(strings, key=lambda x: (len(x), x)), "grammar_type": grammar_type}
     except Exception as e:
         return {"result": [], "error": str(e)}
-
+    
 def evaluate_grammar(grammar, start_symbol, input_string):
     """Evalúa una gramática y determina si acepta una cadena de entrada."""
     try:

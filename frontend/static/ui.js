@@ -231,10 +231,10 @@ const UI = {
   displayGeneratedStrings: function (data) {
     const container = document.getElementById('generatedStrings');
     
-    if (data.error) {
+    if (!data) {
       container.innerHTML = `
-        <div class="text-warning font-medium flex items-center gap-2">
-          <i class="bi bi-exclamation-triangle-fill"></i> ${data.error}
+        <div class="text-gray-400 italic">
+          <i class="bi bi-info-circle mr-2"></i> Use el botón "Generar Cadenas" para ver las cadenas posibles
         </div>
       `;
       return;
@@ -249,9 +249,15 @@ const UI = {
       return;
     }
     
+    const maxLength = document.getElementById('max_length').value;
+    let lengthInfo = '';
+    if (maxLength) {
+      lengthInfo = ` (Longitud máxima: ${maxLength})`;
+    }
+    
     let html = `
       <div class="mb-2 text-gray-300">
-        <span class="font-medium">Cadenas generadas:</span> 
+        <span class="font-medium">Cadenas generadas${lengthInfo}:</span> 
         <span class="text-sm text-gray-400">(Mostrando ${Math.min(data.result.length, 20)} de ${data.result.length})</span>
       </div>
       <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
@@ -260,7 +266,7 @@ const UI = {
     data.result.slice(0, 20).forEach(str => {
       html += `
         <div class="bg-dark-700/50 border border-dark-600 rounded px-2 py-1 text-center text-sm font-mono">
-          ${str || 'λ'}
+          ${str || 'λ'} ${maxLength ? `<span class="text-xs text-gray-500">(${str.length})</span>` : ''}
         </div>
       `;
     });

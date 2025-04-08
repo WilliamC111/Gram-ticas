@@ -61,8 +61,6 @@
         <span class="text-primary">Evaluador</span> de Gramáticas
       </h1>
 
-      <!-- No inline styles - using Tailwind classes instead -->
-
       <!-- Sección de producciones -->
       <div
         class="bg-dark-800 rounded-lg shadow-glow overflow-hidden border border-dark-600 transition-all hover:shadow-glow-primary"
@@ -268,6 +266,25 @@
                 letras minúsculas y símbolos terminales
               </p>
             </div>
+            <div>
+              <label
+                for="max_length"
+                class="block text-sm font-medium text-gray-300 mb-2 flex items-center"
+              >
+                Longitud máxima de cadenas (opcional):
+              </label>
+              <input
+                type="number"
+                min="1"
+                class="w-full bg-dark-700 border border-dark-600 rounded-md px-3 py-2.5 text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors"
+                id="max_length"
+                placeholder="Ejemplo: 3"
+                aria-label="Longitud máxima de cadenas a generar"
+              />
+              <p class="text-xs text-gray-400 mt-1.5 ml-1">
+                <i class="bi bi-info-circle-fill text-primary/80 mr-1"></i> Dejar vacío para generar todas las cadenas posibles
+              </p>
+            </div>
           </div>
         </div>
 
@@ -288,6 +305,14 @@
             aria-label="Evaluar Cadena"
           >
             <i class="bi bi-gear text-xl"></i> Evaluar Cadena
+          </button>
+          <button
+            type="button"
+            id="generateStringsBtn"
+            class="w-full p-4 bg-gradient-to-r from-primary to-cyber-purple text-white rounded-lg transition-all flex items-center justify-center gap-3 hover:shadow-glow font-medium focus:outline-none focus:ring-2 focus:ring-primary/70 transform hover:scale-[1.02] active:scale-[0.98] duration-200"
+            aria-label="Generar Cadenas"
+          >
+            <i class="bi bi-list-ul text-xl"></i> Generar Cadenas
           </button>
           <button
             type="button"
@@ -382,40 +407,40 @@
         </div>
       </div>
 
-<!-- Árbol de derivación -->
-<div class="bg-dark-800 rounded-lg shadow-glow overflow-hidden border border-dark-600 transition-all hover:shadow-glow-primary duration-300 mt-2">
-  <div class="p-3 border-b border-dark-700 bg-gradient-to-r from-dark-700 to-dark-600">
-    <h5 class="text-lg font-medium text-gray-200 flex items-center gap-2">
-      <i class="bi bi-diagram-3 text-cyber-teal"></i> Árbol de Derivación
-    </h5>
-  </div>
-  <div class="p-4 bg-dark-900/30">
-    <div id="derivationTree" class="relative text-center bg-dark-800 rounded-md border border-dark-600 p-4 min-h-[500px]" aria-label="Visualización del árbol de derivación">
-      <svg width="100%" height="500" class="tree-svg"></svg>
-      <div class="tree-placeholder absolute inset-0 flex flex-col items-center justify-center text-gray-400 italic">
-        <i class="bi bi-diagram-3 text-4xl mb-3 opacity-20"></i>
-        <p>El árbol de derivación aparecerá aquí cuando genere las derivaciones</p>
+      <!-- Árbol de derivación -->
+      <div class="bg-dark-800 rounded-lg shadow-glow overflow-hidden border border-dark-600 transition-all hover:shadow-glow-primary duration-300 mt-2">
+        <div class="p-3 border-b border-dark-700 bg-gradient-to-r from-dark-700 to-dark-600">
+          <h5 class="text-lg font-medium text-gray-200 flex items-center gap-2">
+            <i class="bi bi-diagram-3 text-cyber-teal"></i> Árbol de Derivación
+          </h5>
+        </div>
+        <div class="p-4 bg-dark-900/30">
+          <div id="derivationTree" class="relative text-center bg-dark-800 rounded-md border border-dark-600 p-4 min-h-[500px]" aria-label="Visualización del árbol de derivación">
+            <svg width="100%" height="500" class="tree-svg"></svg>
+            <div class="tree-placeholder absolute inset-0 flex flex-col items-center justify-center text-gray-400 italic">
+              <i class="bi bi-diagram-3 text-4xl mb-3 opacity-20"></i>
+              <p>El árbol de derivación aparecerá aquí cuando genere las derivaciones</p>
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
-  </div>
-</div>
 
-<!-- Nueva sección: Cadenas generadas -->
-<div class="bg-dark-800 rounded-lg shadow-glow overflow-hidden border border-dark-600 transition-all hover:shadow-glow-primary duration-300 mt-2">
-  <div class="p-3 border-b border-dark-700 bg-gradient-to-r from-dark-700 to-dark-600">
-    <h5 class="text-lg font-medium text-gray-200 flex items-center gap-2">
-      <i class="bi bi-list-ul text-cyber-teal"></i> Cadenas Generadas por la Gramática
-    </h5>
-  </div>
-  <div class="p-5">
-    <div id="generatedStrings" class="min-h-[100px]">
-      <div class="text-gray-400 italic">
-        <i class="bi bi-info-circle mr-2"></i> Las cadenas generadas por la gramática aparecerán aquí después de la evaluación
+      <!-- Nueva sección: Cadenas generadas -->
+      <div class="bg-dark-800 rounded-lg shadow-glow overflow-hidden border border-dark-600 transition-all hover:shadow-glow-primary duration-300 mt-2">
+        <div class="p-3 border-b border-dark-700 bg-gradient-to-r from-dark-700 to-dark-600">
+          <h5 class="text-lg font-medium text-gray-200 flex items-center gap-2">
+            <i class="bi bi-list-ul text-cyber-teal"></i> Cadenas Generadas por la Gramática
+          </h5>
+        </div>
+        <div class="p-5">
+          <div id="generatedStrings" class="min-h-[100px]">
+            <div class="text-gray-400 italic">
+              <i class="bi bi-info-circle mr-2"></i> Use el botón "Generar Cadenas" para ver las cadenas posibles
+            </div>
+          </div>
+        </div>
       </div>
     </div>
-  </div>
-</div>
-</div>
 
     <script src="{{ url_for('static', filename='api.js') }}" defer></script>
     <script
