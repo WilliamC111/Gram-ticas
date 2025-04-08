@@ -10,8 +10,10 @@ const Grammar = {
       .getElementsByTagName('tr');
 
     for (let row of rows) {
-      const variableInput = row.getElementsByClassName('variable-input')[0];
-      const productionInput = row.getElementsByClassName('production-input')[0];
+      // Find the input elements directly within the row's cells to avoid class name issues
+      const cells = row.getElementsByTagName('td');
+      const variableInput = cells[0]?.querySelector('input');
+      const productionInput = cells[2]?.querySelector('input');
 
       if (!variableInput || !productionInput) continue;
 
@@ -23,27 +25,35 @@ const Grammar = {
 
         const alternatives = production.split('|').map((alt) => alt.trim());
 
-        if (alternatives.length === 0) alternatives.push('');
+        if (
+          alternatives.length === 0 ||
+          (alternatives.length === 1 && alternatives[0] === '')
+        ) {
+          alternatives[0] = 'λ';
+        }
 
         for (const alt of alternatives) {
-          if (alt === '') {
+          if (alt === '' || alt === 'λ') {
             productions.push(`${variable} → λ`);
           } else {
-            const symbols = alt
-              .split(/(?=[A-Z])|\B/)
-              .filter((c) => c !== '' && c !== 'λ');
+            // Process each character, keeping uppercase letters as separate symbols
+            const symbols = [];
+            for (let i = 0; i < alt.length; i++) {
+              const char = alt[i];
+              if (/[A-Z]/.test(char)) {
+                symbols.push(char);
+                variables.add(char);
+              } else if (/[a-z0-9]/.test(char)) {
+                symbols.push(char);
+                terminals.add(char);
+              }
+            }
+
             if (symbols.length === 0) {
               productions.push(`${variable} → λ`);
             } else {
               const formattedProduction = symbols.join(' ');
               productions.push(`${variable} → ${formattedProduction}`);
-              symbols.forEach((symbol) => {
-                if (/^[a-zλ]+$/.test(symbol)) {
-                  terminals.add(symbol);
-                } else if (/^[A-Z]+$/.test(symbol)) {
-                  variables.add(symbol);
-                }
-              });
             }
           }
         }
@@ -53,9 +63,10 @@ const Grammar = {
     const filteredProductions = productions.filter(
       (prod) => prod.trim() !== '',
     );
+
     const grammarText = `
-    T = (${Array.from(terminals).join(', ')})
-    N = (${Array.from(variables).join(', ')})
+    T = {${Array.from(terminals).join(', ')}}
+    N = {${Array.from(variables).join(', ')}}
     S = ${startSymbol}
     P = {
         ${filteredProductions.join('\n    ')}

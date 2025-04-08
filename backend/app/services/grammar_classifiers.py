@@ -10,9 +10,9 @@ from .grammar_utils import is_terminal, is_non_terminal, is_lambda
 def is_right_linear_production(rhs):
     """
     Verifica si una producción es lineal a la derecha (A → aB o A → a).
-    
+
     Ver docs/grammar_classifiers_docs.py (IS_RIGHT_LINEAR_PRODUCTION_DOCS) para documentación detallada.
-    
+
     Args:
         rhs (list): El lado derecho de la producción como lista de símbolos
     Returns:
@@ -28,9 +28,9 @@ def is_right_linear_production(rhs):
 def is_left_linear_production(rhs):
     """
     Verifica si una producción es lineal a la izquierda (A → Ba o A → a).
-    
+
     Ver docs/grammar_classifiers_docs.py (IS_LEFT_LINEAR_PRODUCTION_DOCS) para documentación detallada.
-    
+
     Args:
         rhs (list): El lado derecho de la producción como lista de símbolos
     Returns:
@@ -46,9 +46,9 @@ def is_left_linear_production(rhs):
 def is_type_3_grammar(productions):
     """
     Valida si una gramática es de Tipo 3 (Gramática Regular) según la jerarquía de Chomsky.
-    
+
     Ver docs/grammar_classifiers_docs.py (IS_TYPE_3_GRAMMAR_DOCS) para documentación detallada.
-    
+
     Args:
         productions (dict): Diccionario que mapea tuplas LHS a listas de listas RHS
     Returns:
@@ -62,15 +62,19 @@ def is_type_3_grammar(productions):
         if len(lhs) != 1 or not is_non_terminal(lhs[0]):
             return False, None
 
+    # Determinar si tiene producciones lambda (palabra vacía)
+    # Para una gramática tipo 3, no debemos permitir producciones λ
+    for lhs, rhs_list in productions.items():
+        for rhs in rhs_list:
+            if rhs == ["λ"]:
+                # Si hay alguna producción lambda, no es tipo 3
+                return False, None
+
     # Determine if it's right-linear or left-linear
     linear_type = None  # 'right', 'left' or None
 
     for lhs, rhs_list in productions.items():
         for rhs in rhs_list:
-            # Lambda case
-            if rhs == ["λ"]:
-                continue
-
             # Check regular productions
             if len(rhs) == 1:
                 # A → a (a terminal)
@@ -99,9 +103,9 @@ def is_type_3_grammar(productions):
 def is_type_2_grammar(productions):
     """
     Valida si una gramática es de Tipo 2 (Gramática Libre de Contexto) según la jerarquía de Chomsky.
-    
+
     Ver docs/grammar_classifiers_docs.py (IS_TYPE_2_GRAMMAR_DOCS) para documentación detallada.
-    
+
     Args:
         productions (dict): Diccionario que mapea tuplas LHS a listas de listas RHS
     Returns:
