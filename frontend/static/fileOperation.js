@@ -22,7 +22,8 @@ const FileOperations = {
   downloadProductions: function () {
     const productions = FileOperations.collectProductionsFromUI();
     const dataStr = JSON.stringify(productions, null, 2);
-    const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
+    const dataUri =
+      'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
 
     const exportFileDefaultName = 'producciones.json';
 
@@ -35,16 +36,35 @@ const FileOperations = {
   collectProductionsFromUI: function () {
     const rows = document.querySelectorAll('#productionsTable tbody tr');
     const productions = [];
+    const startSymbol = document.getElementById('start_symbol').value;
 
-    rows.forEach((row) => {
-      const variableInput = row.querySelector('.variable-input');
-      const productionInput = row.querySelector('.production-input');
+    // Depuración: ver cuántas filas estamos procesando
+    console.log(`Procesando ${rows.length} filas de producción`);
 
-      if (variableInput && productionInput) {
+    rows.forEach((row, index) => {
+      const inputs = row.querySelectorAll('input');
+
+      if (inputs.length >= 2) {
+        const variableInput = inputs[0];
+        const productionInput = inputs[1];
+
         const variable = variableInput.value.trim();
-        const production = productionInput.value.trim();
+        let production = productionInput.value.trim();
 
-        if (variable && production) {
+        console.log(
+          `Fila ${index + 1}: Variable=${variable}, Producción=${production}`,
+        );
+
+        // Asegurarse de que capturamos producciones que solo contienen lambda (λ)
+        if (
+          variable &&
+          (production || production === 'λ' || production === '')
+        ) {
+          // Si la producción está vacía o es exactamente "λ", la consideramos como lambda
+          if (production === '' || production === 'λ') {
+            production = 'λ';
+          }
+
           productions.push({
             variable: variable,
             production: production,
@@ -53,9 +73,11 @@ const FileOperations = {
       }
     });
 
+    console.log('Producciones recopiladas:', productions);
+
     return {
       productions: productions,
-      startSymbol: document.getElementById('start_symbol').value,
+      startSymbol: startSymbol,
     };
   },
 };
