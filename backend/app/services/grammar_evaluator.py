@@ -52,7 +52,7 @@ def generate_strings(grammar, start_symbol, max_strings=20, max_length=None):
                 
             # Limitar recursión
             if steps > 100:  
-                continue
+                break
                 
             # Expandir el primer no terminal
             for i, sym in enumerate(current):
